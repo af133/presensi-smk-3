@@ -1,11 +1,11 @@
 @extends('admin.layout')
-
+@section('header', 'Manajemen Role')
 @section('content')
 <div x-data="{ createModal: false, editModal: false, roleName: '', roleId: '' }" class="p-6">
     
  
     <div class="flex justify-between mb-6">
-        <h2 class="text-2xl font-bold">Manajemen Role</h2>
+        
         <button @click="createModal = true" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
             + Tambah Role
         </button>
@@ -64,6 +64,9 @@
                 </div>
             </form>
         </div>
+    </div>
+    <div class="p-4 bg-white border-t">
+            {{ $roles->links() }}
     </div>
 </div>
 @endsection

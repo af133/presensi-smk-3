@@ -6,13 +6,19 @@ use Illuminate\Database\Eloquent\Model;
 
 class Schedule extends Model
 {
-    protected $fillable = [
-        'day', 'jam_ke', 'start_time', 'end_time', 
-        'rombel_id', 'subject_id', 'teacher_id', 'classroom_id'
+    protected $fillable=[
+        'time_slot_id',
+        'rombel_id',
+        'subject_id',
+        'teacher_id',
+        'classroom_id'
     ];
 
     public function rombel() {
         return $this->belongsTo(Rombel::class);
+    }
+    public function time(){
+        return $this->belongsTo(TimeSlot::class);
     }
 
     public function subject() {

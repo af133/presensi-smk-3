@@ -1,5 +1,5 @@
 <header class="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-8">
-    <h2 class="text-lg font-semibold text-gray-800">Dashboard</h2>
+    <h2 class="text-lg font-semibold text-gray-800">@yield('header', 'Dashboard')</h2>
 
     <div x-data="{ open: false }" class="relative">
         <button @click="open = !open" class="flex items-center gap-3 focus:outline-none">

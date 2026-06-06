@@ -1,15 +1,15 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
 class Student extends Model
 {
-    protected $fillable = ['rombel_id', 'nisn', 'name'];
+    protected $fillable = ['nisn', 'name'];
 
-    public function rombel()
+    // Relasi Many-to-Many
+    public function rombels()
     {
-        return $this->belongsTo(Rombel::class);
+        return $this->belongsToMany(Rombel::class, 'rombel_student');
     }
 }

@@ -1,5 +1,5 @@
 @extends('admin.layout')
-
+@section('header', 'Edit Data Guru')
 @section('content')
 <div class="p-6 max-w-2xl mx-auto">
     <div class="bg-white p-6 rounded-lg shadow">

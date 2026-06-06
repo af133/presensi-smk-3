@@ -1,8 +1,8 @@
 @extends('admin.layout')
-
+@section('header', 'Manajemen Guru')
 @section('content')
 <div class="p-6">
-    <h2 class="text-2xl font-bold mb-6">Daftar Guru</h2>
+    
 
     <form action="{{ route('admin.guru.index') }}" method="GET" class="flex gap-4 mb-6 bg-white p-4 rounded-lg shadow-sm border">
         <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Nama atau NIP..." class="border rounded px-3 py-2 w-full">
@@ -37,7 +37,9 @@
                     <td class="px-6 py-4">{{ $guru->name }}</td>
                     <td class="px-6 py-4">{{ $guru->nip }}</td>
                     <td class="px-6 py-4">{{ $guru->email }}</td>
-                    <td class="px-6 py-4">{{ $guru->role->name ?? '-' }}</td>
+                    <td class="px-6 py-4 capitalize">
+                        {{ $guru->roles->pluck('name')->implode(', ') ?? '-' }}
+                    </td>
                     <td class="px-6 py-4 text-center">
                         <div class="flex justify-center gap-2">
                             <a href="{{ route('admin.guru.edit', $guru->id) }}" class="text-blue-600 hover:text-blue-800">Edit</a>
@@ -52,6 +54,9 @@
                 @endforeach
             </tbody>
         </table>
+        <div class="p-4 bg-white border-t">
+            {{ $gurus->links() }}
+        </div>
     </div>
 </div>
 @endsection

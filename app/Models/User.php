@@ -29,6 +29,11 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    // Tambahkan di dalam class User
+    public function waliKelasDari()
+    {
+        return $this->hasOne(Rombel::class, 'guru_id');
+    }
     public function roles()
     {
         return $this->belongsToMany(Role::class, 'model_has_roles', 'user_id', 'role_id');

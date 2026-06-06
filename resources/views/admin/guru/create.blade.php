@@ -1,9 +1,8 @@
 @extends('admin.layout')
-
+@section('header', 'Tambah Guru')
 @section('content')
 <div class="p-6 max-w-2xl mx-auto">
     <div class="bg-white p-6 rounded-lg shadow">
-        <h2 class="text-2xl font-bold mb-6">Tambah Guru Baru</h2>
 
         <form action="{{ route('admin.guru.store') }}" method="POST">
             @csrf

@@ -45,46 +45,38 @@
                     </div>
                 </div>
             </div>
-            <div x-data="{ open: false }">
-                <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-2 rounded hover:bg-gray-800 text-gray-200 transition-all">
-                    <span>Siswa</span>
-                    <span :class="open ? 'rotate-90' : ''" class="text-xs">▶</span>
-                </button>
-                <div x-show="open" class="pl-8 py-1 space-y-1 text-sm text-gray-400">
-                    <a href="#" class="block py-1 hover:text-indigo-400 transition-colors">Create</a>
-                    <a href="#" class="block py-1 hover:text-indigo-400 transition-colors">List Siswa</a>
-                </div>
-            </div>
+             <a href="{{ route('admin.students.index') }}" 
+            class="block px-4 py-2 rounded transition-colors font-medium {{ request()->routeIs('admin.students.*') ? 'bg-indigo-600 text-white' : 'hover:bg-gray-800 text-gray-200' }}">
+                Manajamen Siswa
+            </a>
         </div>
 
         <div class="text-[10px] uppercase tracking-widest text-gray-500 font-bold px-4 py-2 border-t border-gray-800 mt-4">Manajemen Jadwal</div>
         <div class="space-y-1">
-            <a href="#" class="block px-4 py-2 rounded hover:bg-gray-800 text-gray-200 transition-colors">Jam Pelajaran</a>
-            <a href="#" class="block px-4 py-2 rounded hover:bg-gray-800 text-gray-200 transition-colors">Jadwal Hari Pelajaran</a>
+            <a href="{{ route('admin.times.index') }}" 
+            class="block px-4 py-2 rounded transition-colors font-medium {{ request()->routeIs('admin.times.index') ? 'bg-indigo-600 text-white' : 'hover:bg-gray-800 text-gray-200' }}">
+                Jam Pelajaran
+            </a>
+            <a href="{{ route('admin.days.index') }}" 
+            class="block px-4 py-2 rounded transition-colors font-medium {{ request()->routeIs('admin.days.index') ? 'bg-indigo-600 text-white' : 'hover:bg-gray-800 text-gray-200' }}">
+                Jadwal Hari Pelajaran
+            </a>
         </div>
 
         <div class="text-[10px] uppercase tracking-widest text-gray-500 font-bold px-4 py-2 border-t border-gray-800 mt-4">Manajemen Pelajaran</div>
         <div class="space-y-1">
-            <div x-data="{ open: false }">
-                <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-2 rounded hover:bg-gray-800 text-gray-200 transition-all">
-                    <span>Pelajaran</span>
-                    <span :class="open ? 'rotate-90' : ''" class="text-xs">▶</span>
-                </button>
-                <div x-show="open" class="pl-8 py-1 space-y-1 text-sm text-gray-400">
-                    <a href="#" class="block py-1 hover:text-indigo-400 transition-colors">Add Pelajaran</a>
-                    <a href="#" class="block py-1 hover:text-indigo-400 transition-colors">List Pelajaran</a>
-                </div>
-            </div>
-            <div x-data="{ open: false }">
-                <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-2 rounded hover:bg-gray-800 text-gray-200 transition-all">
-                    <span>Kelas/Ruangan</span>
-                    <span :class="open ? 'rotate-90' : ''" class="text-xs">▶</span>
-                </button>
-                <div x-show="open" class="pl-8 py-1 space-y-1 text-sm text-gray-400">
-                    <a href="#" class="block py-1 hover:text-indigo-400 transition-colors">Add Kelas/Ruangan</a>
-                    <a href="#" class="block py-1 hover:text-indigo-400 transition-colors">List Kelas/Ruangan</a>
-                </div>
-            </div>
+            <a href="{{ route('admin.subjects.index') }}" 
+            class="block py-2 px-4 rounded transition-colors {{ request()->routeIs('admin.subjects.*') ? 'bg-indigo-600 text-white' : 'hover:bg-gray-800 text-gray-200' }}">
+                Pelajaran
+            </a>
+            <a href="{{ route('admin.classrooms.index') }}" 
+            class="block py-2 px-4 rounded transition-colors {{ request()->routeIs('admin.classrooms.*') ? 'bg-indigo-600 text-white' : 'hover:bg-gray-800 text-gray-200' }}">
+                Kelas
+            </a>
+            <a href="{{ route('admin.rombels.index') }}" 
+            class="block py-2 px-4 rounded transition-colors {{ request()->routeIs('admin.rombels.*') ? 'bg-indigo-600 text-white' : 'hover:bg-gray-800 text-gray-200' }}">
+                Rombongan Belajar
+            </a>
         </div>
     </nav>
 

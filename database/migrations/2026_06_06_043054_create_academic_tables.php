@@ -16,22 +16,30 @@ return new class extends Migration
             $table->boolean('is_active')->default(false);
             $table->timestamps();
         });
-
+        // 1. Tambahkan academic_year_id ke Rombel
         Schema::create('rombels', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // 10-A, 10-B
+            $table->string('name'); 
             $table->foreignId('guru_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('academic_year_id')->constrained()->onDelete('cascade'); 
             $table->timestamps();
         });
-        
-        // Siswa tidak butuh email/password
+
+        // 3. Tabel students jadi bersih dari relasi kelas
         Schema::create('students', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('rombel_id')->constrained();
             $table->string('nisn')->unique();
             $table->string('name');
             $table->timestamps();
         });
+        // 2. Buat tabel pivot untuk Siswa ke Rombel (Enrollment)
+        Schema::create('rombel_student', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('rombel_id')->constrained()->onDelete('cascade');
+            $table->foreignId('student_id')->constrained()->onDelete('cascade');
+            $table->timestamps();
+        });
+
     }
 
     /**
@@ -42,5 +50,6 @@ return new class extends Migration
         Schema::dropIfExists('academic_years');
         Schema::dropIfExists('rombels');
         Schema::dropIfExists('students');
+        Schema::dropIfExists('rombel_student');
     }
 };
