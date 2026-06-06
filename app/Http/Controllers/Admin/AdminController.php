@@ -148,4 +148,31 @@ class AdminController extends Controller
 
         return redirect()->route('admin.guru.index')->with('success', 'Guru berhasil dihapus!');
     }
+
+    public function edit()
+    {
+        return view('admin.profile.edit', ['user' => Auth::user()]);
+    }
+
+    public function update(Request $request)
+    {
+        $user = Auth::user();
+        
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'nullable|min:6|confirmed',
+        ]);
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->save();
+
+        return back()->with('success', 'Profil berhasil diperbarui!');
+    }
 }

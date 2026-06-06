@@ -77,11 +77,15 @@
             class="block py-2 px-4 rounded transition-colors {{ request()->routeIs('admin.rombels.*') ? 'bg-indigo-600 text-white' : 'hover:bg-gray-800 text-gray-200' }}">
                 Rombongan Belajar
             </a>
+            <a href="{{ route('admin.academic-years.index') }}" 
+            class="block py-2 px-4 rounded transition-colors {{ request()->routeIs('admin.academic-years.*') ? 'bg-indigo-600 text-white' : 'hover:bg-gray-800 text-gray-200' }}">
+                Academic Years
+            </a>
         </div>
     </nav>
 
     <div class="p-4 border-t border-gray-800 bg-gray-950">
-        <form action="" method="POST">
+        <form action="{{ route('admin.logout') }}" method="POST">
             @csrf
             <button type="submit" class="w-full flex items-center justify-center gap-2 py-2 text-red-400 hover:bg-red-900/20 rounded transition-all font-semibold">
                 Logout

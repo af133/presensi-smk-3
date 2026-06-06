@@ -82,4 +82,10 @@ Route::middleware(['web', 'admin'])->group(function () {
     Route::post('/academic-years/store', [AdminScheduleController::class, 'yearStore'])->name('admin.academic-years.store');
     Route::post('/academic-years/update/{academicYear}', [AdminScheduleController::class, 'yearUpdate'])->name('admin.academic-years.update');
     Route::post('/academic-years/delete/{academicYear}', [AdminScheduleController::class, 'yearDestroy'])->name('admin.academic-years.destroy');
+
+    // Edit Profile
+    Route::get('/profile', [AdminController::class, 'edit'])->name('admin.profile.edit');
+    Route::post('/profile/update', [AdminController::class, 'update'])->name('admin.profile.update');
+    // Logut
+    Route::post('/logout', [AutentifkasiController::class, 'logout'])->name('admin.logout');
 });
