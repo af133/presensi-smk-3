@@ -18,7 +18,9 @@ return new class extends Migration
         });
 
         Schema::table('users', function (Blueprint $table) {
-            $table->string('nip')->unique()->after('id')->nullable(); 
+            $table->string('nip')->unique()->after('id')->nullable();
+            
+
         });
 
         Schema::create('model_has_roles', function (Blueprint $table) {

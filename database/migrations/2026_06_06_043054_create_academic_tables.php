@@ -20,6 +20,7 @@ return new class extends Migration
         Schema::create('rombels', function (Blueprint $table) {
             $table->id();
             $table->string('name'); // 10-A, 10-B
+            $table->foreignId('guru_id')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
         });
         
