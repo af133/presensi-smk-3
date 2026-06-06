@@ -70,10 +70,16 @@ Route::middleware(['web', 'admin'])->group(function () {
     Route::post('/days/manage/store', [AdminScheduleController::class, 'manageStore'])->name('admin.schedules.store');
     Route::post('/days/manage/update/{id}', [AdminScheduleController::class, 'manageUpdate'])->name('admin.days.manage.update');
     Route::post('/days/manage/delete/{id}', [AdminScheduleController::class, 'manageDestroy'])->name('admin.days.manage.delete');
-    
+
     //  Manajement Siswa
     Route::get('students', [AdminSiswaController::class, 'index'])->name('admin.students.index');
     Route::post('students', [AdminSiswaController::class, 'store'])->name('admin.students.store');
     Route::put('students/{id}', [AdminSiswaController::class, 'update'])->name('admin.students.update');
     Route::delete('students/{id}', [AdminSiswaController::class, 'destroy'])->name('admin.students.delete');
+
+    // Academi Year
+    Route::get('/academic-years', [AdminScheduleController::class, 'yearIndex'])->name('admin.academic-years.index');
+    Route::post('/academic-years/store', [AdminScheduleController::class, 'yearStore'])->name('admin.academic-years.store');
+    Route::post('/academic-years/update/{academicYear}', [AdminScheduleController::class, 'yearUpdate'])->name('admin.academic-years.update');
+    Route::post('/academic-years/delete/{academicYear}', [AdminScheduleController::class, 'yearDestroy'])->name('admin.academic-years.destroy');
 });

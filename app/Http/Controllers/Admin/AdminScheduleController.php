@@ -11,6 +11,7 @@ use App\Models\Classroom;
 use App\Models\Rombel;
 use App\Models\Subject;
 use App\Models\User;
+use App\Models\AcademicYear;
 
 class AdminScheduleController extends Controller
 {
@@ -121,5 +122,44 @@ class AdminScheduleController extends Controller
         $schedule->delete();
 
         return back()->with('success', 'Jadwal berhasil dihapus!');
+    }
+    public function yearIndex(Request $request)
+    {
+        $years = AcademicYear::query()
+            ->when($request->search, fn($q, $s) => $q->where('name', 'like', "%{$s}%"))
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('admin.academic-years.index', compact('years'));
+    }
+
+    public function yearStore(Request $request)
+    {
+        $request->validate(['name' => 'required|string|max:255']);
+        
+        AcademicYear::create([
+            'name' => $request->name,
+            'is_active' => $request->has('is_active') ? true : false
+        ]);
+
+        return back()->with('success', 'Data berhasil ditambahkan');
+    }
+
+    public function yearUpdate(Request $request, AcademicYear $academicYear)
+    {
+        $request->validate(['name' => 'required|string|max:255']);
+
+        $academicYear->update([
+            'name' => $request->name,
+            'is_active' => $request->has('is_active') ? true : false
+        ]);
+
+        return back()->with('success', 'Data berhasil diupdate');
+    }
+
+    public function yearDestroy(AcademicYear $academicYear)
+    {
+        $academicYear->delete();
+        return back()->with('success', 'Data berhasil dihapus');
     }
 }
