@@ -16,7 +16,7 @@ Route::middleware(['web', 'admin'])->group(function () {
     // Role Management untuk guru 
     Route::get('/roles', [AdminController::class, 'indexRole'])->name('admin.roles.index');
     Route::post('/roles/store', [AdminController::class, 'storeRole'])->name('admin.roles.store');
-    Route::post('/roles/update/{id}', [AdminController::class, 'updateRole'])->name('admin.roles.update');
+    Route::post('/roles/update/{id}', [AdminController::class, 'roleUpdate'])->name('admin.roles.update');
     Route::post('/roles/delete/{id}', [AdminController::class, 'destroyRole'])->name('admin.roles.delete');
 
     // Route untuk manajemen guru

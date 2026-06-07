@@ -39,24 +39,38 @@ class AdminController extends Controller
         return view('admin.roles.index', compact('roles'));
     }
 
-    public function storeRole(Request $request) {
-        try {
-            $request->validate(['name' => 'required|unique:roles,name']);
-            Role::create(['name' => $request->name]);
-            return redirect()->back()->with('success', 'Role berhasil ditambahkan!');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menambahkan role: ' . $e->getMessage());
-        }
+   public function storeRole(Request $request)
+    {
+        $request->validate(['name' => 'required|unique:roles']);
+
+        Role::create([
+            'name' => $request->name,
+            'can_jadwal_kelas' => $request->has('can_jadwal_kelas'),
+            'can_laporan_presensi_siswa_guru' => $request->has('can_laporan_presensi_siswa_guru'),
+            'can_laporan_presensi_siswa_all' => $request->has('can_laporan_presensi_siswa_all'),
+            'can_laporan_presensi_guru' => $request->has('can_laporan_presensi_guru'),
+            'can_monitoring_kelas' => $request->has('can_monitoring_kelas'),
+            'can_laporan_jurnal_pembelajaran' => $request->has('can_laporan_jurnal_pembelajaran'),
+        ]);
+
+        return back()->with('success', 'Role berhasil dibuat');
     }
 
-    public function updateRole(Request $request, $id) {
-        try {
-            $request->validate(['name' => 'required|unique:roles,name,' . $id]);
-            Role::findOrFail($id)->update(['name' => $request->name]);
-            return redirect()->back()->with('success', 'Role berhasil diperbarui!');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal update role.');
-        }
+    public function roleUpdate(Request $request, $id)
+    {
+        $role = Role::findOrFail($id);
+        
+        $role->update([
+            'name' => $request->name,
+            'can_jadwal_kelas' => $request->has('can_jadwal_kelas'),
+            'can_laporan_presensi_siswa_guru' => $request->has('can_laporan_presensi_siswa_guru'),
+            'can_laporan_presensi_siswa_all' => $request->has('can_laporan_presensi_siswa_all'),
+            'can_laporan_presensi_guru' => $request->has('can_laporan_presensi_guru'),
+            'can_monitoring_kelas' => $request->has('can_monitoring_kelas'),
+            'can_laporan_jurnal_pembelajaran' => $request->has('can_laporan_jurnal_pembelajaran'),
+        ]);
+
+        return back()->with('success', 'Role berhasil diupdate');
     }
 
     public function destroyRole($id) {
@@ -175,4 +189,7 @@ class AdminController extends Controller
 
         return back()->with('success', 'Profil berhasil diperbarui!');
     }
+    
+
 }
+

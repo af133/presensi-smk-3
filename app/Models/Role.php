@@ -6,7 +6,23 @@ use Illuminate\Database\Eloquent\Model;
 
 class Role extends Model
 {
-    protected $fillable = ['name'];
+    protected $fillable = [
+        'name', 
+        'can_jadwal_kelas',
+        'can_laporan_presensi_siswa_guru',
+        'can_laporan_presensi_siswa_all',
+        'can_laporan_presensi_guru',
+        'can_monitoring_kelas',
+        'can_laporan_jurnal_pembelajaran'
+    ];
+    protected $casts = [
+        'can_jadwal_kelas' => 'boolean',
+        'can_laporan_presensi_siswa_guru' => 'boolean',
+        'can_laporan_presensi_siswa_all' => 'boolean',
+        'can_laporan_presensi_guru' => 'boolean',
+        'can_monitoring_kelas' => 'boolean',
+        'can_laporan_jurnal_pembelajaran' => 'boolean',
+    ];
 
     public function users()
     {

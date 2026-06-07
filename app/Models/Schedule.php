@@ -18,7 +18,7 @@ class Schedule extends Model
         return $this->belongsTo(Rombel::class);
     }
     public function time(){
-        return $this->belongsTo(TimeSlot::class);
+        return $this->belongsTo(TimeSlot::class,'time_slot_id');
     }
 
     public function subject() {

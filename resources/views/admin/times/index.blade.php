@@ -52,7 +52,7 @@
                                     class="text-indigo-600 hover:text-indigo-900 font-semibold">Edit</button>
                             
                             <form action="{{ route('admin.times.delete', $time->id) }}" method="POST" onsubmit="return confirm('Yakin hapus data ini?')">
-                                @csrf @method('DELETE')
+                                @csrf @method('POST')
                                 <button type="submit" class="text-red-600 hover:text-red-900 font-semibold">Hapus</button>
                             </form>
                         </td>

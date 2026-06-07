@@ -12,11 +12,10 @@ return new class extends Migration
     public function up() {
         Schema::create('academic_years', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // 2025/2026
+            $table->string('name'); 
             $table->boolean('is_active')->default(false);
             $table->timestamps();
         });
-        // 1. Tambahkan academic_year_id ke Rombel
         Schema::create('rombels', function (Blueprint $table) {
             $table->id();
             $table->string('name'); 
@@ -24,15 +23,12 @@ return new class extends Migration
             $table->foreignId('academic_year_id')->constrained()->onDelete('cascade'); 
             $table->timestamps();
         });
-
-        // 3. Tabel students jadi bersih dari relasi kelas
         Schema::create('students', function (Blueprint $table) {
             $table->id();
             $table->string('nisn')->unique();
             $table->string('name');
             $table->timestamps();
         });
-        // 2. Buat tabel pivot untuk Siswa ke Rombel (Enrollment)
         Schema::create('rombel_student', function (Blueprint $table) {
             $table->id();
             $table->foreignId('rombel_id')->constrained()->onDelete('cascade');
