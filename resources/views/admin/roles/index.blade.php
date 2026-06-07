@@ -82,7 +82,7 @@
                     <label class="flex items-center"><input type="checkbox" name="can_laporan_presensi_siswa_all" x-model="canPresensiAll" class="mr-2"> Presensi Siswa (All)</label>
                     <label class="flex items-center"><input type="checkbox" name="can_laporan_presensi_guru" x-model="canPresensiGuruOnly" class="mr-2"> Presensi Guru</label>
                     <label class="flex items-center"><input type="checkbox" name="can_monitoring_kelas" x-model="canMonitoring" class="mr-2"> Monitoring Kelas</label>
-                    <label class="flex items-center"><input type="checkbox" name="can_laporan_jurnal_pembelajaran" x-model="canJurnal" class="mr-2"> Jurnal Pembelajaran</label>
+                    {{-- <label class="flex items-center"><input type="checkbox" name="can_laporan_jurnal_pembelajaran" x-model="canJurnal" class="mr-2"> Jurnal Pembelajaran</label> --}}
                 </div>
 
                 <div class="flex justify-end gap-2 mt-6">

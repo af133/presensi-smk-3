@@ -47,21 +47,20 @@
     </div>
 @endif
     <body class="h-full overflow-hidden">
-        <div class="flex h-screen" x-data="{ sidebarOpen: window.innerWidth > 768 }">
-            
-            <div class="transition-all duration-300 ease-in-out" 
-                :class="sidebarOpen ? 'w-64' : 'w-0 overflow-hidden'">
-                @include('admin.component.side-bar')
-            </div>
-
-            <div class="flex-1 flex flex-col h-full overflow-hidden">
-                
-                @include('admin.component.top-bar')
-
-                <main class="flex-1 overflow-y-auto p-6">
-                    @yield('content')
-                </main>
-            </div>
+    <div class="flex h-screen" x-data>
+        
+        <div class="transition-all duration-300 ease-in-out bg-gray-900" 
+             :class="$store.sidebar.open ? 'w-64' : 'w-0 overflow-hidden'">
+            @include('admin.component.side-bar')
         </div>
-    </body>
+
+        <div class="flex-1 flex flex-col h-full overflow-hidden">
+            @include('admin.component.top-bar')
+
+            <main class="flex-1 overflow-y-auto p-6 bg-gray-100">
+                @yield('content')
+            </main>
+        </div>
+    </div>
+</body>
 </html>
