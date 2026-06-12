@@ -2,7 +2,7 @@ import Alpine from 'alpinejs';
 
 window.Alpine = Alpine;
 Alpine.store('sidebar', {
-    open: window.innerWidth > 768,
+    open: false,
     toggle() {
         this.open = !this.open;
     }

@@ -1,7 +1,11 @@
-<button @click="$store.sidebar.toggle()" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg md:hidden">
-    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+<button 
+    @click="$store.sidebar.toggle()" 
+    class="hidden md:block p-2 text-gray-600 hover:bg-gray-100 rounded-lg md:hidden flex items-center justify-center"
+>
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+    </svg>
 </button>
-
 <div x-data="{ open: false }" class="relative ml-auto">
     <button @click="open = !open" class="flex items-center gap-2">
         <span class="text-sm font-medium">{{ auth()->user()->name }}</span>
