@@ -39,7 +39,7 @@ class ImportSql extends Command
         
         try {
             $sql = File::get($filePath);
-            $cleanSql = trim($sql); // Hapus spasi atau baris kosong di awal/akhir file
+            $cleanSql = trim($sql); 
 
             if (empty($cleanSql)) {
                 $this->warn("File SQL kosong atau hanya berisi spasi, langkah import dilewati.");
