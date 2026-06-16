@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
-#[Signature('app:import-sql {file=presensismk.sql : Nama file SQL di folder database}')]
+#[Signature('app:import-sql {file=presensismk.sql : Nama file SQL di folder database} {--force : Paksa jalankan proses}')]
 #[Description('Jalankan migrate:fresh, import SQL, dan db:seed sekaligus')]
 class ImportSql extends Command
 {
@@ -18,6 +18,7 @@ class ImportSql extends Command
      */
     public function handle()
     {
+        
         $fileName = $this->argument('file');
         $filePath = database_path($fileName);
 
@@ -31,7 +32,7 @@ class ImportSql extends Command
 
         // 2. Migrate:Fresh
         $this->info("Menjalankan migrate:fresh...");
-        Artisan::call('migrate:fresh');
+        Artisan::call('migrate:fresh'['--force']);
         $this->line("Migrasi selesai.");
 
         // 3. Import SQL
@@ -54,7 +55,7 @@ class ImportSql extends Command
 
         // 4. DB:Seed
         $this->info("Menjalankan db:seed...");
-        Artisan::call('db:seed');
+        Artisan::call('db:seed',['--force']);
         $this->line("Seeding selesai.");
 
         $this->info("Semua proses berhasil dilakukan!");
