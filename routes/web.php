@@ -5,10 +5,10 @@ use App\Http\Controllers\Guru\PresensiController;
 use App\Http\Controllers\WaliKelasController;
 use App\Http\Controllers\Guru\JurnalReportController;
 use App\Http\Controllers\Guru\AutenfikasiController as AuthGuru;
-Route::get('/denah',function(){
+Route::get('/h',function(){
     return view('denah');
 });
-Route::get('/',[AuthGuru::class,'showLoginForm'])->name('login');
+Route::get('/login',[AuthGuru::class,'showLoginForm'])->name('login');
 Route::post('/login/check',[AuthGuru::class,'login'])->name('guru.login.process');
 Route::post('/logout',[AuthGuru::class,'logout'])->name('guru.logout');
 Route::middleware(['web', 'guru'])->group(function () {
