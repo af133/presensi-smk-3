@@ -18,7 +18,7 @@ class ImportSql extends Command
      */
     public function handle()
     {
-        
+
         $fileName = $this->argument('file');
         $filePath = database_path($fileName);
 
@@ -28,19 +28,28 @@ class ImportSql extends Command
             return Command::FAILURE;
         }
 
-        $this->info("Memulai proses: Migrate Fresh -> Import SQL -> Seed");
+        $this->info("Memulai proses: Migrate Fresh -> Seed -> Import SQL");
 
-        // 2. Migrate:Fresh
+        // 1. Migrate Fresh
         $this->info("Menjalankan migrate:fresh...");
-        Artisan::call('migrate:fresh'['--force']);
+        Artisan::call('migrate:fresh', [
+            '--force' => true,
+        ]);
         $this->line("Migrasi selesai.");
+
+        // 2. Seed
+        $this->info("Menjalankan db:seed...");
+        Artisan::call('db:seed', [
+            '--force' => true,
+        ]);
+        $this->line("Seeding selesai.");
 
         // 3. Import SQL
         $this->info("Mengimport file: {$fileName}...");
-        
+
         try {
             $sql = File::get($filePath);
-            $cleanSql = trim($sql); 
+            $cleanSql = trim($sql);
 
             if (empty($cleanSql)) {
                 $this->warn("File SQL kosong atau hanya berisi spasi, langkah import dilewati.");
@@ -52,13 +61,5 @@ class ImportSql extends Command
             $this->error("Gagal import SQL: " . $e->getMessage());
             return Command::FAILURE;
         }
-
-        // 4. DB:Seed
-        $this->info("Menjalankan db:seed...");
-        Artisan::call('db:seed',['--force']);
-        $this->line("Seeding selesai.");
-
-        $this->info("Semua proses berhasil dilakukan!");
-        return Command::SUCCESS;
     }
 }
