@@ -12,7 +12,10 @@ use App\Http\Requests\StoreGuruRequest;
 use App\Models\Student;
 use App\Models\Rombel;
 use App\Models\Presence;
+use OpenSpout\Reader\XLSX\Reader;
+use Illuminate\Support\Facades\DB;
 use App\Models\Journal;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\UpdateGuruRequest;
 class AdminController extends Controller
 {
@@ -189,7 +192,47 @@ class AdminController extends Controller
 
         return back()->with('success', 'Profil berhasil diperbarui!');
     }
-    
+    public function updateStatus(Request $request, $id)
+    {
+        $guru = User::findOrFail($id);
+        $guru->status = $request->status;
+        $guru->save();
 
+        return back()->with('success', 'Status berhasil diubah!');
+    }
+public function import(Request $request)
+{
+    $request->validate(['file' => 'required|mimes:xlsx']);
+
+    $reader = new Reader();
+    $reader->open($request->file('file')->getPathname());
+
+    DB::transaction(function () use ($reader) {
+        foreach ($reader->getSheetIterator() as $sheet) {
+            foreach ($sheet->getRowIterator() as $index => $row) {
+                if ($index === 1) continue;
+
+                $cells = $row->toArray();
+                if (empty($cells[2])) continue; 
+                $user = User::updateOrCreate(
+                    ['email' => $cells[2]],
+                    [
+                        'name'     => $cells[0],
+                        'nip'      => $cells[1],
+                        'password' => Hash::make('password123'),
+                        'status'   => 1,
+                    ]
+                );
+                $role = Role::where('name', 'guru')->first();
+                if ($role && !$user->hasRole('guru')) {
+                    $user->roles()->attach($role->id);
+                }
+            }
+            break;
+        }
+    });
+    $reader->close();
+    return back()->with('success', 'Data berhasil diimport!');
+}
 }
 

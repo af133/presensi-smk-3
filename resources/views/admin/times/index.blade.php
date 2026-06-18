@@ -66,6 +66,9 @@
             </table>
         </div>
     </div>
+    <div class="mt-4">
+        {{ $times->links() }}
+    </div>
 
     <div x-show="showModal" class="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50 p-4">
         <div class="bg-white/90 backdrop-blur-xl p-8 rounded-2xl w-full max-w-md shadow-2xl border border-white/30" @click.away="showModal = false">

@@ -26,6 +26,9 @@ Route::middleware(['web', 'admin'])->group(function () {
     Route::post('/guru/delete/{id}', [AdminController::class, 'destroyGuru'])->name('admin.guru.delete');
     Route::get('/guru/create', [AdminController::class, 'createGuru'])->name('admin.guru.create');
     Route::post('/guru/store', [AdminController::class, 'storeGuru'])->name('admin.guru.store');
+    Route::post('/admin/guru/status/{id}', [AdminController::class, 'updateStatus'])->name('admin.guru.update-status');
+    Route::post('/import', [AdminController::class, 'import'])->name('admin.guru.import');
+    // admin.guru.import
     
     // Route untuk manajemen jam pelajaran 
     Route::get('/times', [AdminScheduleController::class, 'index'])->name('admin.times.index');

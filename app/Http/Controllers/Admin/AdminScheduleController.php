@@ -22,7 +22,8 @@ class AdminScheduleController extends Controller
             ->when($request->day_id, function ($query, $day_id) {
                 return $query->where('day_id', $day_id);
             })
-            ->get();
+            ->paginate(10) 
+            ->withQueryString();
 
         $days = Day::all(); 
         return view('admin.times.index', compact('times', 'days'));
@@ -54,21 +55,17 @@ class AdminScheduleController extends Controller
     }
     public function daysIndex()
     {
-        // Mengambil semua hari (pastikan seeder sudah dijalankan agar data ada)
         $days = Day::all(); 
         return view('admin.days.index', compact('days'));
     }
     public function manage($day_id)
     {
-        // 1. Ambil data hari untuk judul
         $day = Day::findOrFail($day_id);
 
-        // 2. Ambil semua slot waktu di hari tersebut beserta jadwal yang ada di dalamnya
         $timeSlots = TimeSlot::where('day_id', $day_id)
             ->with(['schedules.rombel', 'schedules.subject', 'schedules.teacher', 'schedules.classroom'])
             ->get();
 
-        // 3. Ambil data pendukung untuk dropdown modal
         $rombels = Rombel::all();
         $subjects = Subject::all();
         $teachers = User::whereHas('roles', function($query) {

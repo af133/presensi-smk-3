@@ -67,11 +67,11 @@
         <div class="space-y-1">
             <a href="{{ route('admin.subjects.index') }}" 
             class="block py-2 px-4 rounded transition-colors {{ request()->routeIs('admin.subjects.*') ? 'bg-indigo-600 text-white' : 'hover:bg-gray-800 text-gray-200' }}">
-                Pelajaran
+                Nama Mata Pelajaran
             </a>
             <a href="{{ route('admin.classrooms.index') }}" 
             class="block py-2 px-4 rounded transition-colors {{ request()->routeIs('admin.classrooms.*') ? 'bg-indigo-600 text-white' : 'hover:bg-gray-800 text-gray-200' }}">
-                Kelas
+                Nama Ruangan
             </a>
             <a href="{{ route('admin.rombels.index') }}" 
             class="block py-2 px-4 rounded transition-colors {{ request()->routeIs('admin.rombels.*') ? 'bg-indigo-600 text-white' : 'hover:bg-gray-800 text-gray-200' }}">
@@ -79,7 +79,7 @@
             </a>
             <a href="{{ route('admin.academic-years.index') }}" 
             class="block py-2 px-4 rounded transition-colors {{ request()->routeIs('admin.academic-years.*') ? 'bg-indigo-600 text-white' : 'hover:bg-gray-800 text-gray-200' }}">
-                Academic Years
+                Tahun Akaedemik
             </a>
         </div>
     </nav>

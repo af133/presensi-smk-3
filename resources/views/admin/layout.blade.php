@@ -46,6 +46,12 @@
         </div>
     </div>
 @endif
+    <div id="loader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-100 transition-opacity duration-500">
+        <div class="flex flex-col items-center">
+            <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+            <p class="mt-4 text-sm font-semibold text-gray-600 animate-pulse">Memuat Dashboard...</p>
+        </div>
+    </div>
     <body class="h-full overflow-hidden">
     <div class="flex h-screen" x-data>
         
@@ -62,5 +68,14 @@
             </main>
         </div>
     </div>
+    <script>
+        window.addEventListener('load', function() {
+            const loader = document.getElementById('loader');
+            loader.style.opacity = '0';
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 500);
+        });
+    </script>
 </body>
 </html>

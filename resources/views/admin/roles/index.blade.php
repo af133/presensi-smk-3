@@ -43,7 +43,6 @@
                 <tr class="border-b">
                     <td class="px-6 py-4 capitalize font-medium">{{ $role->name }}</td>
                     
-                    {{-- Kolom Permission --}}
                     <td class="px-6 py-4">
                         <div class="flex flex-wrap gap-1 max-w-xs">
                             @if($role->can_jadwal_kelas) <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded">Jadwal</span> @endif
@@ -68,7 +67,6 @@
         </table>
     </div>
 
-    {{-- Modal (Satu untuk Tambah & Edit) --}}
     <div x-show="createModal || editModal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
         <div class="bg-white p-6 rounded-lg w-full max-w-md" @click.away="createModal = false; editModal = false">
             <h3 class="font-bold mb-4" x-text="editModal ? 'Edit Role' : 'Tambah Role Baru'"></h3>
@@ -82,7 +80,6 @@
                     <label class="flex items-center"><input type="checkbox" name="can_laporan_presensi_siswa_all" x-model="canPresensiAll" class="mr-2"> Presensi Siswa (All)</label>
                     <label class="flex items-center"><input type="checkbox" name="can_laporan_presensi_guru" x-model="canPresensiGuruOnly" class="mr-2"> Presensi Guru</label>
                     <label class="flex items-center"><input type="checkbox" name="can_monitoring_kelas" x-model="canMonitoring" class="mr-2"> Monitoring Kelas</label>
-                    {{-- <label class="flex items-center"><input type="checkbox" name="can_laporan_jurnal_pembelajaran" x-model="canJurnal" class="mr-2"> Jurnal Pembelajaran</label> --}}
                 </div>
 
                 <div class="flex justify-end gap-2 mt-6">

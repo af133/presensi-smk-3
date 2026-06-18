@@ -10,7 +10,7 @@
             <a href="{{ route('guru.dashboard') }}" class="block p-3 rounded-lg hover:bg-slate-800 transition">Jadwal Kelas</a>
         @endif
 
-        {{-- Laporan Presensi Siswa (Cek salah satu akses: Guru atau All) --}}
+        {{-- Laporan Presensi Siswa--}}
         @if(auth()->user()->hasPermission('can_laporan_presensi_siswa_guru') || auth()->user()->hasPermission('can_laporan_presensi_siswa_all'))
             <a href="{{ route('guru.report.index') }}" class="block p-3 rounded-lg hover:bg-slate-800 transition">Laporan Presensi siswa</a>
         @endif

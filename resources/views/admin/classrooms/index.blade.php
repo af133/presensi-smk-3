@@ -22,13 +22,12 @@
 
         <button @click="showModal = true; editMode = false; formUrl = '{{ route('admin.classrooms.store') }}'; name=''" 
                 class="bg-indigo-600/80 backdrop-blur-sm text-white px-4 py-2 rounded-lg hover:bg-indigo-700/90 transition shadow-lg w-full md:w-auto">
-            + Tambah Mapel
+            + Tambah Ruangan
         </button>
     </div>
 
     <div class="bg-white/70 backdrop-blur-md shadow-xl rounded-xl overflow-hidden border border-white/30">
         <table class="w-full text-left border-collapse">
-            {{-- Header Tabel --}}
             <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
                     <th class="p-4 font-bold text-gray-700">Nama</th>
@@ -52,7 +51,6 @@
                 </tr>
                 @empty
                 <tr>
-                    {{-- colspan diubah ke 2 karena sekarang ada 2 kolom --}}
                     <td colspan="2" class="p-4 text-center text-gray-500">Data tidak ditemukan.</td>
                 </tr>
                 @endforelse
