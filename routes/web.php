@@ -5,9 +5,7 @@ use App\Http\Controllers\Guru\PresensiController;
 use App\Http\Controllers\WaliKelasController;
 use App\Http\Controllers\Guru\JurnalReportController;
 use App\Http\Controllers\Guru\AutenfikasiController as AuthGuru;
-Route::get('/h',function(){
-    return view('denah');
-});
+Route::get('/',[PresensiController::class,'denahIndex'])->name('denah');
 Route::get('/login',[AuthGuru::class,'showLoginForm'])->name('login');
 Route::post('/login/check',[AuthGuru::class,'login'])->name('guru.login.process');
 Route::post('/logout',[AuthGuru::class,'logout'])->name('guru.logout');
@@ -32,10 +30,6 @@ Route::middleware(['web', 'guru'])->group(function () {
     // Route::get('/laporan/jurnal/download',
     //     [JurnalReportController::class, 'download'])->name('waka.laporan.jurnal.download');
  
-    // Route debug sementara — hapus setelah data muncul
-    Route::get('/laporan/jurnal/debug',
-        [JurnalReportController::class, 'debug'])->name('waka.laporan.jurnal.debug');
-
     // Jurnal
     Route::post('/jurnal/{presenceId}',     [PresensiController::class, 'storeJournal'])->name('guru.jurnal.store');
     // Report siswa presensi

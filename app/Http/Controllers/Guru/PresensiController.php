@@ -17,6 +17,7 @@ use App\Models\Classroom;
 use App\Models\TimeSlot;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\Room;
 
 class PresensiController extends Controller
 {
@@ -418,5 +419,15 @@ class PresensiController extends Controller
             'currentDayName',
             'isToday'
         ));
+    }
+    public function denahIndex(){
+        $maps = Room::select(
+            'id',
+            'name',
+            'room_code',
+            'floor',
+            DB::raw('ST_AsGeoJSON(coordinates) as geojson')
+        )->get();
+     return view('denah',compact('maps'));   
     }
 }
