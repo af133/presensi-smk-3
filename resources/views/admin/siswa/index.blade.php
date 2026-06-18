@@ -7,23 +7,52 @@
     formData: { name: '', nisn: '', rombel_id: '' }
 }">
 
-    <div class="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
-
-        <form action="{{ route('admin.students.index') }}" method="GET" class="flex gap-2">
+    <div class="mb-8 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+    
+        <form action="{{ route('admin.students.index') }}" method="GET" class="flex flex-wrap gap-2 w-full xl:w-auto">
             <input type="text" name="search" value="{{ request('search') }}" 
-                   placeholder="Cari NISN atau Nama..." 
-                   class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none w-64">
-            <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900">Cari</button>
-            <a href="{{ route('admin.students.index') }}" class="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300">Reset</a>
+                placeholder="Cari NISN atau Nama..." 
+                class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none w-full md:w-64">
+            
+            <select name="rombel_id" class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none w-full md:w-48">
+                <option value="">Semua Rombel</option>
+                @foreach($rombels as $r)
+                    <option value="{{ $r->id }}" {{ request('rombel_id') == $r->id ? 'selected' : '' }}>
+                        {{ $r->name }}
+                    </option>
+                @endforeach
+            </select>
+            
+            <div class="flex gap-2 w-full md:w-auto">
+                <button type="submit" class="flex-1 md:flex-none bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900 transition">Cari</button>
+                <a href="{{ route('admin.students.index') }}" class="flex-1 md:flex-none bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition text-center">Reset</a>
+            </div>
         </form>
 
-        <button @click="
-            showModal = true; editMode = false; 
-            formUrl = '{{ route('admin.students.store') }}';
-            formData = { name: '', nisn: '', rombel_id: '' }
-        " class="bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700">
-            + Tambah Siswa
-        </button>
+        <div class="flex flex-wrap items-center gap-4 w-full xl:w-auto justify-start xl:justify-end border-t xl:border-t-0 pt-4 xl:pt-0">
+            
+            <button @click="
+                showModal = true; editMode = false; 
+                formUrl = '{{ route('admin.students.store') }}';
+                formData = { name: '', nisn: '', rombel_id: '' }
+            " class="bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm">
+                + Tambah Siswa
+            </button>
+
+            <div class="flex items-center gap-3">
+                <form action="{{ route('admin.siswa.import') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <label class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg cursor-pointer transition text-sm font-medium shadow-sm">
+                        <input type="file" name="file" class="hidden" onchange="this.form.submit()">
+                        Import Siswa
+                    </label>
+                </form>
+                
+                <a href="{{ asset('doc/Tamplate Excel Siswa.xlsx') }}" class="text-indigo-600 hover:underline text-sm font-medium whitespace-nowrap">
+                    Template
+                </a>
+            </div>
+        </div>
     </div>
 
     <div class="bg-white shadow-xl rounded-xl overflow-hidden border">

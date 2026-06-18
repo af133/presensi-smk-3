@@ -79,7 +79,8 @@ Route::middleware(['web', 'admin'])->group(function () {
     Route::post('students', [AdminSiswaController::class, 'store'])->name('admin.students.store');
     Route::put('students/{id}', [AdminSiswaController::class, 'update'])->name('admin.students.update');
     Route::delete('students/{id}', [AdminSiswaController::class, 'destroy'])->name('admin.students.delete');
-
+    Route::post('student/import', [AdminSiswaController::class, 'import'])->name('admin.siswa.import');
+// admin.siswa.import
     // Academi Year
     Route::get('/academic-years', [AdminScheduleController::class, 'yearIndex'])->name('admin.academic-years.index');
     Route::post('/academic-years/store', [AdminScheduleController::class, 'yearStore'])->name('admin.academic-years.store');
