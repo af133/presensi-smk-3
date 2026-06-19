@@ -95,8 +95,8 @@ class AdminSubjectController extends Controller
         ->withQueryString();
     $teachers = User::whereHas('roles', function ($query) {
         $query->where('name','!=', 'admin');
-    })->get();
-    $academicYears = AcademicYear::all();
+    })->where('status',1)->get();
+    $academicYears = AcademicYear::where('is_active',1)->get();
     
     return view('admin.rombels.index', compact('rombels', 'teachers', 'academicYears'));
 }
@@ -139,13 +139,13 @@ public function rombelsStore(Request $request)
         return back()->with('success', 'Rombel berhasil dihapus.');
     }
 
-    public function show($id)
+     public function show($id)
     {
         $rombel = Rombel::with('students')->findOrFail($id);
+        $studentsAvailable = Student::whereNotIn('id', $rombel->students->pluck('id'))->get();
+        $studentsNoRombel = Student::doesntHave('rombels')->get();
         
-        $students = Student::whereNotIn('id', $rombel->students->pluck('id'))->get();
-        
-        return view('admin.rombels.show', compact('rombel', 'students'));
+        return view('admin.rombels.show', compact('rombel', 'studentsAvailable', 'studentsNoRombel'));
     }
 
     public function addStudent(Request $request, $id)

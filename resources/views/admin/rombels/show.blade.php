@@ -74,7 +74,7 @@
             <form action="{{ route('admin.rombels.bulk-add', $rombel->id) }}" method="POST">
                 @csrf
                 <div class="max-h-60 overflow-y-auto mb-4 border p-2 rounded-lg bg-gray-50">
-                    @foreach(\App\Models\Student::all() as $s)
+                    @foreach($studentsNoRombel as $s)
                     <label class="block p-2 hover:bg-indigo-100 cursor-pointer rounded transition"
                            x-show="searchQuery === '' || '{{ $s->nisn }}'.includes(searchQuery) || '{{ strtolower($s->name) }}'.includes(searchQuery.toLowerCase())">
                         <input type="checkbox" name="student_ids[]" value="{{ $s->id }}"> 

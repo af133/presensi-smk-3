@@ -56,14 +56,14 @@
     <div class="flex h-screen" x-data>
         
         <div class="transition-all duration-300 ease-in-out bg-gray-900" 
-             :class="$store.sidebar.open ? 'w-64' : 'w-0 overflow-hidden'">
+             :class="$store.sidebar.open ? 'w-64' : 'w-0'">
             @include('admin.component.side-bar')
         </div>
 
         <div class="flex-1 flex flex-col h-full overflow-hidden">
             @include('admin.component.top-bar')
 
-            <main class="flex-1 overflow-y-auto p-6 bg-gray-100">
+            <main class="flex-1 overflow-y-auto p-2 bg-gray-100">
                 @yield('content')
             </main>
         </div>
@@ -77,5 +77,6 @@
             }, 500);
         });
     </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>

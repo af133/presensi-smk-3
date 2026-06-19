@@ -77,7 +77,7 @@ Route::middleware(['web', 'admin'])->group(function () {
     //  Manajement Siswa
     Route::get('students', [AdminSiswaController::class, 'index'])->name('admin.students.index');
     Route::post('students', [AdminSiswaController::class, 'store'])->name('admin.students.store');
-    Route::put('students/{id}', [AdminSiswaController::class, 'update'])->name('admin.students.update');
+    Route::post('students/{id}', [AdminSiswaController::class, 'update'])->name('admin.students.update');
     Route::delete('students/{id}', [AdminSiswaController::class, 'destroy'])->name('admin.students.delete');
     Route::post('student/import', [AdminSiswaController::class, 'import'])->name('admin.siswa.import');
 // admin.siswa.import

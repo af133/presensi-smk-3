@@ -15,7 +15,7 @@
                 <tr class="bg-gray-100/50">
                     <th class="p-4 text-sm font-bold text-gray-700">No</th>
                     <th class="p-4 text-sm font-bold text-gray-700">Nama Hari</th>
-                    <th class="p-4 text-sm font-bold text-gray-700 text-center">Action</th>
+                    <th class="p-4 text-sm font-bold text-gray-700 text-center">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200/50">

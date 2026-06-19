@@ -1,27 +1,18 @@
+import Alpine from 'alpinejs';
+
 window.Alpine = Alpine;
 
-Alpine.store('sidebar', {
-    open: localStorage.getItem('sidebar_open') !== null 
-        ? localStorage.getItem('sidebar_open') === 'true' 
-        : window.innerWidth > 768,
+document.addEventListener('alpine:init', () => {
+    Alpine.store('sidebar', {
+        open: window.innerWidth > 768 
+            ? (localStorage.getItem('sidebar_open') === 'true' || localStorage.getItem('sidebar_open') === null)
+            : false,
 
-    toggle() {
-        this.open = !this.open;
-        localStorage.setItem('sidebar_open', this.open);
-    },
-
-    updateScreenSize() {
-        if (window.innerWidth <= 768) {
-            this.open = false;
-        } else {
-            this.open = true;
+        toggle() {
+            this.open = !this.open;
+            localStorage.setItem('sidebar_open', this.open);
         }
-        localStorage.setItem('sidebar_open', this.open);
-    }
-});
-
-window.addEventListener('resize', () => {
-    Alpine.store('sidebar').updateScreenSize();
+    });
 });
 
 Alpine.start();

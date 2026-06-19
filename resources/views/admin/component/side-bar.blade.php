@@ -24,7 +24,12 @@
                     <button @click="open = !open" 
                             class="w-full flex items-center justify-between px-4 py-2 rounded hover:bg-gray-800 text-gray-200 transition-all {{ request()->routeIs('admin.guru.*') || request()->routeIs('admin.roles.*')  ? 'bg-indigo-600 text-white' : 'hover:bg-gray-800 text-gray-200' }}">
                         <span>Guru</span>
-                        <span :class="open ? 'rotate-90' : ''" class="text-xs transition-transform duration-200">▶</span>
+                        <span class="transition-transform duration-300" :class="open ? 'rotate-180' : ''">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </span>
+                        
                     </button>
                     
                     <div x-show="open" class="pl-4 py-1 space-y-1 text-sm">
