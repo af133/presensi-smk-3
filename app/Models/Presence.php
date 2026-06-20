@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Presence extends Model
 {
-    protected $fillable = ['schedule_id', 'user_id', 'date', 'check_in_time'];
+    protected $fillable = ['schedule_id', 'user_id', 'date', 'check_in_time','start_time','end_time'];
 
     // Relasi ke Jadwal
     public function schedule(): BelongsTo

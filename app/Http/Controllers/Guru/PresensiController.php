@@ -155,15 +155,18 @@ class PresensiController extends Controller
 
         $date = $request->input('date');
         $scheduleIds = array_keys($request->input('presences'));
-
+        
         DB::transaction(function () use ($request, $date, $scheduleIds) {
             foreach ($scheduleIds as $sessScheduleId) {
+                $schedule= Schedule::where('id',$sessScheduleId)->first();
                 $rows = $request->input("presences.{$sessScheduleId}", []);
                 $presence = Presence::firstOrCreate(
                     ['schedule_id' => $sessScheduleId, 'date' => $date],
                     [
                         'user_id'       => Auth::id(),
                         'check_in_time' => now()->toTimeString(),
+                        'start_time' => $schedule->time->start_time,
+                        'end_time' => $schedule->time->end_time
                     ]
                 );
                 foreach ($rows as $row) {
@@ -264,32 +267,29 @@ class PresensiController extends Controller
                 $used[]  = $id;
                 $current = $presence;
 
-                foreach ($items as $next) {
+               foreach ($items as $next) {
                     $nextId = $next->id;
                     if (in_array($nextId, $used)) continue;
 
                     $sameSubject  = $next->schedule->subject_id   === $current->schedule->subject_id;
                     $sameRombel   = $next->schedule->rombel_id    === $current->schedule->rombel_id;
                     $sameClass    = $next->schedule->classroom_id === $current->schedule->classroom_id;
-                    $consecutive  = $next->schedule->time->start_time === $current->schedule->time->end_time;
-
+                    $consecutive  = $next->start_time === $current->end_time; 
                     if ($sameSubject && $sameRombel && $sameClass && $consecutive) {
                         $group[]  = $next;
                         $used[]   = $nextId;
                         $current  = $next;
                     }
                 }
-
                 $first = $group[0];
                 $last  = end($group);
-
                 $mergedRows[] = [
                     'check_in'  => $first->check_in_time,
-                    'subject'   => $first->schedule->subject->name    ?? '-',
-                    'rombel'    => $first->schedule->rombel->name     ?? '-',
-                    'classroom' => $first->schedule->classroom->name  ?? '-',
-                    'start'     => $first->schedule->time->start_time,
-                    'end'       => $last->schedule->time->end_time,
+                    'subject'   => $first->schedule->subject->name ?? '-',
+                    'rombel'    => $first->schedule->rombel->name  ?? '-',
+                    'classroom' => $first->schedule->classroom->name ?? '-',
+                    'start'     => $first->start_time, 
+                    'end'       => $last->end_time,    
                     'topic'     => $first->journal->topic ?? '-',
                     'sessions'  => count($group),
                 ];

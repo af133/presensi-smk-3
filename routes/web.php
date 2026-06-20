@@ -40,3 +40,6 @@ Route::middleware(['web', 'guru'])->group(function () {
     Route::get('/report/guru/{teacher}/download',[PresensiController::class, 'downloadReportGuru'])->name('waka.report.download');
 
 });
+Route::fallback(function () {
+    return redirect('/');
+});
