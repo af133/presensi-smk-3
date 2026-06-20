@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Guru\PresensiController;
 use App\Http\Controllers\WaliKelasController;
-use App\Http\Controllers\Guru\JurnalReportController;
+use App\Http\Controllers\Guru\ProfileController;
 use App\Http\Controllers\Guru\AutenfikasiController as AuthGuru;
 Route::get('/',[PresensiController::class,'denahIndex'])->name('denah');
 Route::get('/login',[AuthGuru::class,'showLoginForm'])->name('login');
@@ -28,6 +28,9 @@ Route::middleware(['web', 'guru'])->group(function () {
     Route::get('/report/guru',[PresensiController::class, 'reportGuru'])->name('report.index');
     Route::get('/report/guru/{teacher}/download',[PresensiController::class, 'downloadReportGuru'])->name('waka.report.download');
 
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('guru.profile.edit');
+    Route::post('/profile/update', [ProfileController::class, 'update'])->name('guru.profile.update');
 });
 Route::fallback(function () {
     return redirect('/');

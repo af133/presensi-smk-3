@@ -1,11 +1,17 @@
 <div class="h-full flex flex-col bg-slate-900 border-r border-slate-800 shadow-xl">
     <div class="px-6 pt-8 pb-6">
         <h1 class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-6">Dashboard Guru</h1>
-        
-        <div class="flex items-center gap-3 p-3 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg">
-                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+       <div class="flex items-center gap-3 p-3 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
+            <div class="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center shadow-lg border border-white/10">
+                @if(auth()->user()->photo)
+                    <img src="{{ asset('storage/' . auth()->user()->photo) }}" alt="Profile" class="w-full h-full object-cover">
+                @else
+                    <div class="w-full h-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold">
+                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                    </div>
+                @endif
             </div>
+
             <div class="overflow-hidden">
                 <p class="text-white text-sm font-bold truncate leading-tight">{{ auth()->user()->name }}</p>
                 <p class="text-blue-300 text-[10px] font-medium tracking-wide">{{ auth()->user()->nip ?? 'STAFF' }}</p>
@@ -39,7 +45,7 @@
     </nav>
 
     <div class="p-4 border-t border-slate-800">
-        <form action="{{ route('admin.logout') }}" method="POST">
+        <form action="{{ route('guru.logout') }}" method="POST">
             @csrf
             <button type="submit" class="flex items-center gap-3 w-full px-4 py-3 text-slate-500 hover:text-red-400 transition-colors text-sm font-medium">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
