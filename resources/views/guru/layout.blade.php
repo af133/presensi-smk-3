@@ -78,6 +78,23 @@
     <div class="md:hidden">
         @include('guru.component.button-bar')
     </div>
+    <div id="loader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-white">
+        <div class="flex flex-col items-center gap-4">
+            <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-slate-500 font-medium text-sm animate-pulse">Memuat data...</p>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('load', function() {
+            const loader = document.getElementById('loader');
+            loader.style.transition = 'opacity 0.5s ease';
+            loader.style.opacity = '0';
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 500);
+        });
+    </script>
 
 </body>
 </html>

@@ -24,7 +24,6 @@
         <span class="text-xs font-semibold text-slate-400">{{ count($schedules) }} jadwal</span>
     </div>
 
-    {{-- ===== KALENDER MINGGUAN ===== --}}
     <div class="bg-white rounded-2xl p-4 md:p-5 shadow-sm border border-gray-100 mb-6">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">
@@ -51,8 +50,6 @@
                 </a>
             </div>
         </div>
-
-        {{-- Grid 7 hari --}}
         <div class="grid grid-cols-7 gap-1 sm:gap-2">
             @foreach($dates as $d)
                 <a href="?date={{ $d->format('Y-m-d') }}"
@@ -68,8 +65,6 @@
             @endforeach
         </div>
     </div>
-
-    {{-- ===== JADWAL ===== --}}
     <div class="grid grid-cols-1 gap-3 sm:gap-4">
         @forelse($schedules as $schedule)
             @php
@@ -151,8 +146,6 @@
             </div>
         </div>
     </div>
-
-    {{-- ===== MODAL: JURNAL ===== --}}
     <div x-show="showModal"
          x-cloak
          x-transition.opacity

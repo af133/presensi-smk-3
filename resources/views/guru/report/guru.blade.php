@@ -2,17 +2,12 @@
 
 @section('content')
 <div class="max-w-3xl mx-auto p-4 md:p-6">
-    {{-- Header --}}
     <div class="mb-6">
         <h1 class="text-xl font-bold text-gray-900">Laporan Presensi Guru</h1>
         <p class="text-sm text-gray-500 mt-1">Unduh laporan kehadiran per guru berdasarkan periode.</p>
     </div>
-
-    {{-- Main Card --}}
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 md:p-5"
          x-data="{ from: '{{ now()->startOfMonth()->format('Y-m-d') }}', to: '{{ now()->format('Y-m-d') }}' }">
-
-        {{-- Filter Section --}}
         <div class="mb-6">
             <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Filter Periode</p>
             <div class="flex flex-wrap gap-4 items-end">
@@ -29,7 +24,6 @@
             </div>
         </div>
 
-        {{-- Table Section --}}
         <div class="-mx-4 md:mx-0 border border-gray-100 rounded-none md:rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">

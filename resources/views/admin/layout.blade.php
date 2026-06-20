@@ -49,7 +49,7 @@
     <div id="loader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-100 transition-opacity duration-500">
         <div class="flex flex-col items-center">
             <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-            <p class="mt-4 text-sm font-semibold text-gray-600 animate-pulse">Memuat Dashboard...</p>
+            <p class="mt-4 text-sm font-semibold text-gray-600 animate-pulse">Loading</p>
         </div>
     </div>
     <body class="h-full overflow-hidden">
