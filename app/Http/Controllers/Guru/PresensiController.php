@@ -222,6 +222,7 @@ class PresensiController extends Controller
 
         $teacher = User::whereHas('roles', fn($q) => $q->where('name', 'guru'))
             ->findOrFail($teacherId);
+
         $presences = Presence::where('user_id', $teacher->id)
             ->whereBetween('date', [$from, $to])
             ->with([
@@ -232,11 +233,13 @@ class PresensiController extends Controller
                 'schedule.classroom',
             ])
             ->get()
+            ->filter(fn($p) => $p->schedule !== null && $p->schedule->time !== null) // guard
             ->sortBy(fn($p) => $p->date . $p->schedule->time->start_time);
-        $totalScheduled = $presences->count();
+
         $allScheduledDays = Schedule::where('teacher_id', $teacher->id)
             ->with('time')
-            ->get();
+            ->get()
+            ->filter(fn($s) => $s->time !== null); // guard
 
         $expectedCount = 0;
         $currentDay = $from->copy();
@@ -249,10 +252,11 @@ class PresensiController extends Controller
         }
 
         $rekap = [
-            'hadir'  => $presences->count(),
-            'tidak'  => max(0, $expectedCount - $presences->count()),
-            'total'  => $expectedCount,
+            'hadir' => $presences->count(),
+            'tidak' => max(0, $expectedCount - $presences->count()),
+            'total' => $expectedCount,
         ];
+
         $grouped = [];
 
         foreach ($presences->groupBy('date') as $date => $items) {
@@ -263,34 +267,43 @@ class PresensiController extends Controller
                 $id = $presence->id;
                 if (in_array($id, $used)) continue;
 
+                // Guard relasi presence
+                if ($presence->schedule === null) continue;
+
                 $group   = [$presence];
                 $used[]  = $id;
                 $current = $presence;
 
-               foreach ($items as $next) {
+                foreach ($items as $next) {
                     $nextId = $next->id;
                     if (in_array($nextId, $used)) continue;
 
-                    $sameSubject  = $next->schedule->subject_id   === $current->schedule->subject_id;
-                    $sameRombel   = $next->schedule->rombel_id    === $current->schedule->rombel_id;
-                    $sameClass    = $next->schedule->classroom_id === $current->schedule->classroom_id;
-                    $consecutive  = $next->start_time === $current->end_time; 
+                    // Guard relasi next
+                    if ($next->schedule === null) continue;
+
+                    $sameSubject = $next->schedule->subject_id   === $current->schedule->subject_id;
+                    $sameRombel  = $next->schedule->rombel_id    === $current->schedule->rombel_id;
+                    $sameClass   = $next->schedule->classroom_id === $current->schedule->classroom_id;
+                    $consecutive = $next->start_time             === $current->end_time;
+
                     if ($sameSubject && $sameRombel && $sameClass && $consecutive) {
                         $group[]  = $next;
                         $used[]   = $nextId;
                         $current  = $next;
                     }
                 }
+
                 $first = $group[0];
                 $last  = end($group);
+
                 $mergedRows[] = [
                     'check_in'  => $first->check_in_time,
-                    'subject'   => $first->schedule->subject->name ?? '-',
-                    'rombel'    => $first->schedule->rombel->name  ?? '-',
+                    'subject'   => $first->schedule->subject->name   ?? '-',
+                    'rombel'    => $first->schedule->rombel->name    ?? '-',
                     'classroom' => $first->schedule->classroom->name ?? '-',
-                    'start'     => $first->start_time, 
-                    'end'       => $last->end_time,    
-                    'topic'     => $first->journal->topic ?? '-',
+                    'start'     => $first->start_time,
+                    'end'       => $last->end_time,
+                    'topic'     => $first->journal->topic            ?? '-',
                     'sessions'  => count($group),
                 ];
             }
@@ -305,6 +318,114 @@ class PresensiController extends Controller
         $filename = 'Laporan_Guru_' . str_replace(' ', '_', $teacher->name) . '_' . $from->format('Ymd') . '-' . $to->format('Ymd') . '.pdf';
 
         return $pdf->download($filename);
+    }
+
+    public function previewReportGuru(Request $request, $teacherId)
+    {
+        $request->validate([
+            'from' => 'required|date',
+            'to'   => 'required|date|after_or_equal:from',
+        ]);
+
+        $from = Carbon::parse($request->from)->startOfDay();
+        $to   = Carbon::parse($request->to)->endOfDay();
+
+        $teacher = User::whereHas('roles', fn($q) => $q->where('name', 'guru'))
+            ->findOrFail($teacherId);
+
+        $presences = Presence::where('user_id', $teacher->id)
+            ->whereBetween('date', [$from, $to])
+            ->with([
+                'schedule.subject',
+                'schedule.time',
+                'journal',
+                'schedule.rombel',
+                'schedule.classroom',
+            ])
+            ->get()
+            ->filter(fn($p) => $p->schedule !== null && $p->schedule->time !== null) // guard
+            ->sortBy(fn($p) => $p->date . $p->schedule->time->start_time);
+
+        $allScheduledDays = Schedule::where('teacher_id', $teacher->id)
+            ->with('time')
+            ->get()
+            ->filter(fn($s) => $s->time !== null); // guard
+
+        $expectedCount = 0;
+        $currentDay = $from->copy();
+        while ($currentDay->lte($to)) {
+            $dayId = $currentDay->dayOfWeekIso;
+            $expectedCount += $allScheduledDays->filter(
+                fn($s) => $s->time->day_id == $dayId
+            )->count();
+            $currentDay->addDay();
+        }
+
+        $rekap = [
+            'hadir' => $presences->count(),
+            'tidak' => max(0, $expectedCount - $presences->count()),
+            'total' => $expectedCount,
+        ];
+
+        $grouped = [];
+
+        foreach ($presences->groupBy('date') as $date => $items) {
+            $used       = [];
+            $mergedRows = [];
+
+            foreach ($items as $presence) {
+                $id = $presence->id;
+                if (in_array($id, $used)) continue;
+
+                // Guard relasi presence
+                if ($presence->schedule === null) continue;
+
+                $group   = [$presence];
+                $used[]  = $id;
+                $current = $presence;
+
+                foreach ($items as $next) {
+                    $nextId = $next->id;
+                    if (in_array($nextId, $used)) continue;
+
+                    // Guard relasi next
+                    if ($next->schedule === null) continue;
+
+                    $sameSubject = $next->schedule->subject_id   === $current->schedule->subject_id;
+                    $sameRombel  = $next->schedule->rombel_id    === $current->schedule->rombel_id;
+                    $sameClass   = $next->schedule->classroom_id === $current->schedule->classroom_id;
+                    $consecutive = $next->start_time             === $current->end_time;
+
+                    if ($sameSubject && $sameRombel && $sameClass && $consecutive) {
+                        $group[]  = $next;
+                        $used[]   = $nextId;
+                        $current  = $next;
+                    }
+                }
+
+                $first = $group[0];
+                $last  = end($group);
+
+                $mergedRows[] = [
+                    'check_in'  => $first->check_in_time,
+                    'subject'   => $first->schedule->subject->name   ?? '-',
+                    'rombel'    => $first->schedule->rombel->name    ?? '-',
+                    'classroom' => $first->schedule->classroom->name ?? '-',
+                    'start'     => $first->start_time,
+                    'end'       => $last->end_time,
+                    'topic'     => $first->journal->topic            ?? '-',
+                    'sessions'  => count($group),
+                ];
+            }
+
+            $grouped[$date] = $mergedRows;
+        }
+
+        $pdf = Pdf::loadView('waka.report.pdf', compact(
+            'teacher', 'grouped', 'rekap', 'from', 'to'
+        ))->setPaper('a4', 'portrait');
+
+        return $pdf->stream('Preview_Laporan_' . $teacher->name . '.pdf');
     }
       public function monitoringIndex(Request $request)
     {

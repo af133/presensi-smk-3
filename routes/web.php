@@ -23,10 +23,12 @@ Route::middleware(['web', 'guru'])->group(function () {
     Route::get('/report', [WaliKelasController::class, 'index'])->name('guru.report.index');
     Route::get('/report/{student}/download',[WaliKelasController::class, 'downloadReport'])->name('walikelas.report.download');
     Route::get('/report/preview/{studentId}', [WaliKelasController::class, 'previewReport'])->name('walikelas.report.preview');
+    // waka.report.preview
 
     // Report presensi guru
     Route::get('/report/guru',[PresensiController::class, 'reportGuru'])->name('report.index');
     Route::get('/report/guru/{teacher}/download',[PresensiController::class, 'downloadReportGuru'])->name('waka.report.download');
+    Route::get('/report/guru/preview/{teacherId}',[PresensiController::class, 'previewReportGuru'])->name('waka.report.preview');
 
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('guru.profile.edit');
