@@ -43,5 +43,7 @@
     </table>
 </div>
 <div class="mt-4">
-    {{ $students->links() }}
+    @if(is_object($students) && method_exists($students, 'links'))
+        {{ $students->appends(request()->query())->links() }}
+    @endif
 </div>
