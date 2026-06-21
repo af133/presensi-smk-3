@@ -29,6 +29,8 @@ Route::middleware(['web', 'guru'])->group(function () {
     Route::get('/report/guru',[PresensiController::class, 'reportGuru'])->name('report.index');
     Route::get('/report/guru/{teacher}/download',[PresensiController::class, 'downloadReportGuru'])->name('waka.report.download');
     Route::get('/report/guru/preview/{teacherId}',[PresensiController::class, 'previewReportGuru'])->name('waka.report.preview');
+    Route::get('report/guru/download-all', [PresensiController::class, 'downloadAll'])
+        ->name('waka.report.download.all');
 
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('guru.profile.edit');

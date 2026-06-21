@@ -3,15 +3,25 @@
 @section('content')
 <div class="max-w-3xl mx-auto p-4 md:p-6" 
      x-data="{ 
-        from: '{{ now()->startOfMonth()->format('Y-m-d') }}', 
-        to: '{{ now()->format('Y-m-d') }}',
+        from: '{{ request('from', now()->startOfMonth()->format('Y-m-d')) }}', 
+        to: '{{ request('to', now()->format('Y-m-d')) }}',
         showModal: false,
         previewUrl: ''
      }">
     
-    <div class="mb-6">
-        <h1 class="text-xl font-bold text-gray-900">Laporan Presensi Guru</h1>
-        <p class="text-sm text-gray-500 mt-1">Unduh laporan kehadiran per guru berdasarkan periode.</p>
+    <div class="mb-6 flex justify-between items-start">
+        <div>
+            <h1 class="text-xl font-bold text-gray-900">Laporan Presensi Guru</h1>
+            <p class="text-sm text-gray-500 mt-1">Unduh laporan kehadiran per guru berdasarkan periode.</p>
+        </div>
+        <!-- Tombol Unduh Semua -->
+        <a :href="`{{ route('waka.report.download.all') }}?from=${from}&to=${to}`"
+           class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-xs font-bold rounded-xl hover:bg-green-700 shadow-sm transition">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+            </svg>
+            Unduh Semua
+        </a>
     </div>
 
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 md:p-5">
@@ -44,7 +54,7 @@
                     <tbody class="divide-y divide-gray-50">
                         @forelse($teachers as $i => $teacher)
                             <tr class="hover:bg-gray-50/50 transition">
-                                <td class="py-3 px-4 text-gray-400 font-medium">{{ $i + 1 }}</td>
+                                <td class="py-3 px-4 text-gray-400 font-medium">{{ $teachers->firstItem() + $i }}</td>
                                 <td class="py-3 px-2">
                                     <div class="flex items-center gap-3">
                                         <div>
@@ -78,6 +88,9 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+            <div class="p-4 border-t border-gray-100">
+                {{ $teachers->appends(['from' => request('from'), 'to' => request('to')])->links() }}
             </div>
         </div>
     </div>

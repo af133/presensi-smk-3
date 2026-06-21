@@ -228,8 +228,6 @@
 </head>
 <body>
 <div class="page">
-
-    {{-- Header --}}
     <div class="header">
         <div class="header-top">
             <div>
@@ -268,8 +266,6 @@
         <td class="value" colspan="4">{{ Auth::user()->name }}</td>
     </tr>
 </table>
-
-    {{-- Rekap --}}
     <div class="rekap-title" style="margin-bottom: 10px; font-weight: bold; font-size: 11pt;">Rekapitulasi Kehadiran</div>
         <table class="summary-table">
             <thead>

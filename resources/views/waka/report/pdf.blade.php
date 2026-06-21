@@ -192,8 +192,6 @@
             </tr>
         </tbody>
     </table>
-
-    {{-- Tabel --}}
     <div class="table-title">Detail Kehadiran Per Hari</div>
     <table>
         <thead>
@@ -230,7 +228,6 @@
                         <td>{{ $row['classroom'] }}</td>
                         <td>{{ substr($row['start'], 0, 5) }} &ndash; {{ substr($row['end'], 0, 5) }}</td>
                         
-                        {{-- Kolom Jurnal --}}
                         <td style="font-size: 9px; color: #4b5563;">
                             {{ $row['topic'] ?? '-' }}
                         </td>
@@ -253,8 +250,6 @@
             @endforelse
         </tbody>
     </table>
-
-    {{-- Footer --}}
     <div class="footer">
         <div class="footer-note">
             Dicetak pada {{ now()->translatedFormat('d F Y') }}, pukul {{ now()->format('H:i') }} WIB<br>

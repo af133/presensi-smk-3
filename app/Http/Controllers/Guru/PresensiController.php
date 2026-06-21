@@ -201,15 +201,105 @@ class PresensiController extends Controller
     }
 
 
-     public function reportGuru()
+    public function reportGuru(Request $request)
     {
         $teachers = User::whereHas('roles', fn($q) => $q->where('name', 'guru'))
             ->orderBy('name')
-            ->get();
+            ->paginate(10); 
 
         return view('guru.report.guru', compact('teachers'));
     }
 
+    public function downloadAll(Request $request)
+    {
+        $request->validate(['from' => 'required|date', 'to' => 'required|date']);
+        $teachers = User::whereHas('roles', fn($q) => $q->where('name', 'guru'))->get();
+        $zip = new \ZipArchive();
+        $fileName = 'Semua_Laporan_Guru_' . now()->format('Ymd_His') . '.zip';
+        $zipPath = storage_path($fileName);
+        if ($zip->open($zipPath, \ZipArchive::CREATE) === TRUE) {
+            foreach ($teachers as $teacher) {
+                $pdfContent = $this->generatePdfContent($teacher, $request->from, $request->to);
+                $zip->addFromString('Laporan_' . $teacher->name . '.pdf', $pdfContent);
+            }
+            $zip->close();
+        }
+
+        return response()->download($zipPath)->deleteFileAfterSend(true);
+    }
+    private function generatePdfContent($teacher, $fromInput, $toInput)
+    {
+        $from = Carbon::parse($fromInput)->startOfDay();
+        $to   = Carbon::parse($toInput)->endOfDay();
+
+        $presences = Presence::where('user_id', $teacher->id)
+            ->whereBetween('date', [$from, $to])
+            ->with(['schedule.subject', 'schedule.time', 'journal', 'schedule.rombel', 'schedule.classroom'])
+            ->get()
+            ->filter(fn($p) => $p->schedule !== null && $p->schedule->time !== null)
+            ->sortBy(fn($p) => $p->date . $p->schedule->time->start_time);
+
+        $allScheduledDays = Schedule::where('teacher_id', $teacher->id)
+            ->with('time')
+            ->get()
+            ->filter(fn($s) => $s->time !== null);
+
+        $expectedCount = 0;
+        $currentDay = $from->copy();
+        while ($currentDay->lte($to)) {
+            $dayId = $currentDay->dayOfWeekIso;
+            $expectedCount += $allScheduledDays->filter(fn($s) => $s->time->day_id == $dayId)->count();
+            $currentDay->addDay();
+        }
+
+        $rekap = [
+            'hadir' => $presences->count(),
+            'tidak' => max(0, $expectedCount - $presences->count()),
+            'total' => $expectedCount,
+        ];
+
+        $grouped = [];
+        foreach ($presences->groupBy('date') as $date => $items) {
+            $used = [];
+            $mergedRows = [];
+            foreach ($items as $presence) {
+                if (in_array($presence->id, $used) || !$presence->schedule) continue;
+                
+                $group = [$presence];
+                $used[] = $presence->id;
+                $current = $presence;
+
+                foreach ($items as $next) {
+                    if (in_array($next->id, $used) || !$next->schedule) continue;
+                    if ($next->schedule->subject_id === $current->schedule->subject_id &&
+                        $next->schedule->rombel_id === $current->schedule->rombel_id &&
+                        $next->schedule->classroom_id === $current->schedule->classroom_id &&
+                        $next->start_time === $current->end_time) {
+                        $group[] = $next;
+                        $used[] = $next->id;
+                        $current = $next;
+                    }
+                }
+                
+                $first = $group[0];
+                $mergedRows[] = [
+                    'check_in'  => $first->check_in_time,
+                    'subject'   => $first->schedule->subject->name ?? '-',
+                    'rombel'    => $first->schedule->rombel->name ?? '-',
+                    'classroom' => $first->schedule->classroom->name ?? '-',
+                    'start'     => $first->start_time,
+                    'end'       => end($group)->end_time,
+                    'topic'     => $first->journal->topic ?? '-',
+                    'sessions'  => count($group),
+                ];
+            }
+            $grouped[$date] = $mergedRows;
+        }
+
+        return Pdf::loadView('waka.report.pdf', compact('teacher', 'grouped', 'rekap', 'from', 'to'))
+                    ->setPaper('a4', 'portrait')
+                    ->output(); // Penting: gunakan output() untuk mendapatkan binary string PDF
+    }
     public function downloadReportGuru(Request $request, $teacherId)
     {
         $request->validate([
@@ -233,13 +323,13 @@ class PresensiController extends Controller
                 'schedule.classroom',
             ])
             ->get()
-            ->filter(fn($p) => $p->schedule !== null && $p->schedule->time !== null) // guard
+            ->filter(fn($p) => $p->schedule !== null && $p->schedule->time !== null)
             ->sortBy(fn($p) => $p->date . $p->schedule->time->start_time);
 
         $allScheduledDays = Schedule::where('teacher_id', $teacher->id)
             ->with('time')
             ->get()
-            ->filter(fn($s) => $s->time !== null); // guard
+            ->filter(fn($s) => $s->time !== null); 
 
         $expectedCount = 0;
         $currentDay = $from->copy();
@@ -267,7 +357,6 @@ class PresensiController extends Controller
                 $id = $presence->id;
                 if (in_array($id, $used)) continue;
 
-                // Guard relasi presence
                 if ($presence->schedule === null) continue;
 
                 $group   = [$presence];
@@ -277,8 +366,6 @@ class PresensiController extends Controller
                 foreach ($items as $next) {
                     $nextId = $next->id;
                     if (in_array($nextId, $used)) continue;
-
-                    // Guard relasi next
                     if ($next->schedule === null) continue;
 
                     $sameSubject = $next->schedule->subject_id   === $current->schedule->subject_id;
@@ -349,7 +436,7 @@ class PresensiController extends Controller
         $allScheduledDays = Schedule::where('teacher_id', $teacher->id)
             ->with('time')
             ->get()
-            ->filter(fn($s) => $s->time !== null); // guard
+            ->filter(fn($s) => $s->time !== null); 
 
         $expectedCount = 0;
         $currentDay = $from->copy();
