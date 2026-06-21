@@ -54,6 +54,7 @@ class AdminController extends Controller
             'can_laporan_presensi_guru' => $request->has('can_laporan_presensi_guru'),
             'can_monitoring_kelas' => $request->has('can_monitoring_kelas'),
             'can_laporan_jurnal_pembelajaran' => $request->has('can_laporan_jurnal_pembelajaran'),
+            'can_laporan_presensi_siswa_perguru' => $request->has('can_laporan_presensi_siswa_perguru'),
         ]);
 
         return back()->with('success', 'Role berhasil dibuat');
@@ -71,8 +72,8 @@ class AdminController extends Controller
             'can_laporan_presensi_guru' => $request->has('can_laporan_presensi_guru'),
             'can_monitoring_kelas' => $request->has('can_monitoring_kelas'),
             'can_laporan_jurnal_pembelajaran' => $request->has('can_laporan_jurnal_pembelajaran'),
+             'can_laporan_presensi_siswa_perguru' => $request->has('can_laporan_presensi_siswa_perguru'),
         ]);
-
         return back()->with('success', 'Role berhasil diupdate');
     }
 
