@@ -59,7 +59,7 @@ Route::middleware(['web', 'admin'])->group(function () {
     Route::get('/rombels/{id}', [AdminSubjectController::class, 'show'])->name('admin.rombels.show');
     Route::post('/rombels/{id}/add-student', [AdminSubjectController::class, 'addStudent'])->name('admin.rombels.add-student');
     Route::post('/rombels/{id}/add-student', [AdminSubjectController::class, 'addStudent'])->name('admin.rombels.add-student');
-    Route::delete('/rombels/{id}/remove-student/{student_id}', [AdminSubjectController::class, 'removeStudent'])->name('admin.rombels.remove-student');
+    Route::post('/rombels/{id}/remove-student/{student_id}', [AdminSubjectController::class, 'removeStudent'])->name('admin.rombels.remove-student');
 
     // Rombel Management (Batch)
     Route::post('/rombels/{id}/bulk-add', [AdminSubjectController::class, 'bulkAdd'])->name('admin.rombels.bulk-add');
@@ -78,7 +78,7 @@ Route::middleware(['web', 'admin'])->group(function () {
     Route::get('students', [AdminSiswaController::class, 'index'])->name('admin.students.index');
     Route::post('students', [AdminSiswaController::class, 'store'])->name('admin.students.store');
     Route::post('students/{id}', [AdminSiswaController::class, 'update'])->name('admin.students.update');
-    Route::delete('students/{id}', [AdminSiswaController::class, 'destroy'])->name('admin.students.delete');
+    Route::post('students/{id}', [AdminSiswaController::class, 'destroy'])->name('admin.students.delete');
     Route::post('student/import', [AdminSiswaController::class, 'import'])->name('admin.siswa.import');
 // admin.siswa.import
     // Academi Year

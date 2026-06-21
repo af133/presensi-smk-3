@@ -13,6 +13,7 @@ export default defineConfig({
                     weights: [400, 500, 600],
                 }),
             ],
+            publicDirectory: 'public',
         }),
         tailwindcss(),
     ],
@@ -21,4 +22,9 @@ export default defineConfig({
             ignored: ['**/storage/framework/views/**'],
         },
     },
+    build: {
+        outDir: 'public/build',
+        assetsDir: 'assets',   
+        emptyOutDir: true,
+    }
 });

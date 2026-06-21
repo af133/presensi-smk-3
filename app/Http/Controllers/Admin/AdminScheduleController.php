@@ -39,6 +39,10 @@ class AdminScheduleController extends Controller
         TimeSlot::create($data);
         return back()->with('success', 'Jam pelajaran berhasil ditambahkan!');
     }
+    public function destroy($id){
+        TimeSlot::find($id)->delete();
+        return back()->with('success', 'Jam pelajaran berhasil dihapus!');
+    }
 
     public function update(Request $request, $id) {
         $request->validate([

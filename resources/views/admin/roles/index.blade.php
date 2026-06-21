@@ -46,8 +46,8 @@
                     <td class="px-6 py-4">
                         <div class="flex flex-wrap gap-1 max-w-xs">
                             @if($role->can_jadwal_kelas) <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded">Jadwal</span> @endif
-                            @if($role->can_laporan_presensi_siswa_guru) <span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded">Laporan Presensi Siswa</span> @endif
-                            @if($role->can_laporan_presensi_siswa_all) <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded">Laporan Presensi Semua Siswa</span> @endif
+                            @if($role->can_laporan_presensi_siswa_guru) <span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded">Laporan Presensi Siswa (Wali Kelas)</span> @endif
+                            @if($role->can_laporan_presensi_siswa_all) <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded">Laporan Presensi Semua Siswa (BK)</span> @endif
                             @if($role->can_laporan_presensi_guru) <span class="bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded">Laporan Presensi Guru</span> @endif
                             @if($role->can_monitoring_kelas) <span class="bg-purple-100 text-purple-700 text-[10px] font-bold px-2 py-0.5 rounded">Monitoring</span> @endif
                             @if($role->can_laporan_jurnal_pembelajaran) <span class="bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded">Jurnal</span> @endif
@@ -76,8 +76,8 @@
                 
                 <div class="space-y-2 text-sm max-h-60 overflow-y-auto border-t pt-2">
                     <label class="flex items-center"><input type="checkbox" name="can_jadwal_kelas" x-model="canJadwal" class="mr-2"> Jadwal Kelas</label>
-                    <label class="flex items-center"><input type="checkbox" name="can_laporan_presensi_siswa_guru" x-model="canPresensiGuru" class="mr-2"> Laporan Presensi Siswa</label>
-                    <label class="flex items-center"><input type="checkbox" name="can_laporan_presensi_siswa_all" x-model="canPresensiAll" class="mr-2"> Laporan Presensi Semua Siswa</label>
+                    <label class="flex items-center"><input type="checkbox" name="can_laporan_presensi_siswa_guru" x-model="canPresensiGuru" class="mr-2"> Laporan Presensi Siswa (Wali Kelas)</label>
+                    <label class="flex items-center"><input type="checkbox" name="can_laporan_presensi_siswa_all" x-model="canPresensiAll" class="mr-2"> Laporan Presensi Semua Siswa (BK)</label>
                     <label class="flex items-center"><input type="checkbox" name="can_laporan_presensi_guru" x-model="canPresensiGuruOnly" class="mr-2"> Laporan Presensi Guru</label>
                     <label class="flex items-center"><input type="checkbox" name="can_monitoring_kelas" x-model="canMonitoring" class="mr-2"> Monitoring Kelas</label>
                 </div>

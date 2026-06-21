@@ -9,6 +9,7 @@ use App\Models\Rombel;
 use App\Models\AcademicYear;
 use App\Models\User;
 use App\Models\Student;
+use Illuminate\Database\QueryException;
 class AdminSubjectController extends Controller
 {
     public function subjectIndex(Request $request)
@@ -41,11 +42,26 @@ class AdminSubjectController extends Controller
         return redirect()->route('admin.subjects.index')->with('success', 'Mata pelajaran berhasil diupdate.');
     }
 
-    public function subjectDestroy($id)
+   public function subjectDestroy($id)
     {
-        Subject::findOrFail($id)->delete();
-        
-        return redirect()->route('admin.subjects.index')->with('success', 'Mata pelajaran berhasil dihapus.');
+        try {
+            $subject = Subject::findOrFail($id);
+            $subject->delete();
+
+            return redirect()
+                ->route('admin.subjects.index')
+                ->with('success', 'Mata pelajaran berhasil dihapus.');
+
+        } catch (QueryException $e) {
+
+            if ($e->errorInfo[1] == 1451) {
+                return redirect()
+                    ->route('admin.subjects.index')
+                    ->with('error', 'Mata pelajaran tidak dapat dihapus karena masih digunakan oleh data lain.');
+            }
+
+            throw $e;
+        }
     }
     public function classroomIndex(Request $request)
 {
