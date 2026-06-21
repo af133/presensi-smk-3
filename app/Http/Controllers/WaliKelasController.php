@@ -6,21 +6,25 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Student;
 use App\Models\Rombel;
+use App\Models\Schedule;
 use App\Models\StudentPresence;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+
 class WaliKelasController extends Controller
 {
-  
+
     public function index(Request $request)
     {
         $user = auth()->user();
         $search = $request->query('search');
         $rombelId = $request->query('rombel_id');
-        
+
         $studentsAll = collect();
         $studentsTeacher = collect();
+        $studentsPerGuru = collect();
         $rombels = Rombel::all();
 
         if ($user->hasPermission('can_laporan_presensi_siswa_all')) {
@@ -41,9 +45,102 @@ class WaliKelasController extends Controller
             }
         }
 
-        return view('guru.report.index', compact('studentsAll', 'studentsTeacher', 'rombels','user'));
+        if ($user->hasPermission('can_laporan_presensi_siswa_perguru')) {
+            $rombelIds = Schedule::where('teacher_id', $user->id)
+                ->distinct()
+                ->pluck('rombel_id');
+
+            if ($rombelIds->isNotEmpty()) {
+                $studentsPerGuru = Student::whereHas('rombels', fn($q) => $q->whereIn('rombels.id', $rombelIds))
+                    ->when($rombelId, fn($q) => $q->whereHas('rombels', fn($q) => $q->where('rombels.id', $rombelId)))
+                    ->when($search, fn($q) => $q->where('name', 'like', "%{$search}%")->orWhere('nisn', 'like', "%{$search}%"))
+                    ->orderBy('name')
+                    ->distinct()
+                    ->paginate(20, ['*'], 'page_perguru')->withQueryString();
+            }
+        }
+
+        return view('guru.report.index', compact('studentsAll', 'studentsTeacher', 'studentsPerGuru', 'rombels', 'user'));
     }
-    public function downloadReport(Request $request, $studentId)
+
+  
+    private function authorizeStudentAccess(Request $request, $studentId): array
+    {
+        $user = Auth::user();
+        $requestedScope = $request->query('scope');
+
+        $tryAll = function () use ($user, $studentId) {
+            if (!$user->hasPermission('can_laporan_presensi_siswa_all')) {
+                return null;
+            }
+            $student = Student::find($studentId);
+            return $student ? ['student' => $student, 'scope' => 'all'] : null;
+        };
+
+        $tryWaliKelas = function () use ($user, $studentId) {
+            if (!$user->hasPermission('can_laporan_presensi_siswa_guru')) {
+                return null;
+            }
+            $rombel = Rombel::where('guru_id', $user->id)->first();
+            if (!$rombel) {
+                return null;
+            }
+            $student = Student::whereHas('rombels', fn($q) => $q->where('rombels.id', $rombel->id))
+                ->where('id', $studentId)
+                ->first();
+            return $student ? ['student' => $student, 'scope' => 'wali_kelas'] : null;
+        };
+
+        $tryPerGuru = function () use ($user, $studentId) {
+            if (!$user->hasPermission('can_laporan_presensi_siswa_perguru')) {
+                return null;
+            }
+            $rombelIds = Schedule::where('teacher_id', $user->id)->distinct()->pluck('rombel_id');
+            if ($rombelIds->isEmpty()) {
+                return null;
+            }
+            $student = Student::whereHas('rombels', fn($q) => $q->whereIn('rombels.id', $rombelIds))
+                ->where('id', $studentId)
+                ->first();
+            return $student ? ['student' => $student, 'scope' => 'per_guru'] : null;
+        };
+
+        $resolvers = [
+            'all'        => $tryAll,
+            'wali_kelas' => $tryWaliKelas,
+            'per_guru'   => $tryPerGuru,
+        ];
+
+        // 1) Hormati scope yang diminta dari tab, tapi tetap divalidasi ulang di server
+        if ($requestedScope && isset($resolvers[$requestedScope])) {
+            $result = $resolvers[$requestedScope]();
+            if ($result) {
+                return $result;
+            }
+            // requestedScope tidak valid untuk user/siswa ini -> jangan diam-diam ganti scope,
+            // supaya tidak salah menampilkan data yang lebih luas dari tab yang diminta.
+            abort(403, 'Anda tidak memiliki akses ke laporan siswa ini melalui tab tersebut.');
+        }
+
+        // 2) Tidak ada scope dikirim (atau nilai sampah) -> fallback ke prioritas terluas
+        foreach ($resolvers as $resolver) {
+            $result = $resolver();
+            if ($result) {
+                return $result;
+            }
+        }
+
+        abort(403, 'Anda tidak memiliki akses ke laporan siswa ini.');
+    }
+
+    /**
+     * @param Request $request
+     * @param Student $student
+     * @param int|null $teacherId  Jika diisi, presensi difilter hanya untuk sesi
+     *                             yang diajar guru ini (jalur akses 'per_guru').
+     *                             Null berarti tampilkan semua mapel (jalur 'all' / 'wali_kelas').
+     */
+    private function buildReportData(Request $request, Student $student, ?int $teacherId = null)
     {
         $request->validate([
             'from' => 'required|date',
@@ -51,18 +148,22 @@ class WaliKelasController extends Controller
         ]);
         $from = Carbon::parse($request->from)->startOfDay();
         $to   = Carbon::parse($request->to)->endOfDay();
-        $rombel = Rombel::where('guru_id', Auth::id())->firstOrFail();
-        $student = Student::whereHas('rombels', fn($q) => $q->where('rombels.id', $rombel->id))
-            ->findOrFail($studentId);
+
         $presences = StudentPresence::where('student_id', $student->id)
-            ->whereHas('presence', fn($q) => $q->whereBetween('date', [$from, $to]))
+            ->whereHas('presence', function ($q) use ($from, $to, $teacherId) {
+                $q->whereBetween('date', [$from, $to]);
+                if ($teacherId) {
+                    $q->whereHas('schedule', fn($q) => $q->where('teacher_id', $teacherId));
+                }
+            })
             ->with([
                 'presence.schedule.subject',
                 'presence.schedule.teacher',
-                'presence' 
+                'presence'
             ])
             ->get()
             ->sortBy(fn($sp) => $sp->presence->date . $sp->presence->start_time);
+
         $rekap = [
             'hadir' => $presences->where('status', 'hadir')->count(),
             'sakit' => $presences->where('status', 'sakit')->count(),
@@ -70,6 +171,7 @@ class WaliKelasController extends Controller
             'alpha' => $presences->where('status', 'alpha')->count(),
             'total' => $presences->count(),
         ];
+
         $grouped = [];
         foreach ($presences->groupBy(fn($sp) => $sp->presence->date) as $date => $items) {
             $used    = [];
@@ -114,6 +216,22 @@ class WaliKelasController extends Controller
 
             $grouped[$date] = $mergedRows;
         }
+
+        return compact('from', 'to', 'rekap', 'grouped');
+    }
+
+    public function downloadReport(Request $request, $studentId)
+    {
+        ['student' => $student, 'scope' => $scope] = $this->authorizeStudentAccess($request, $studentId);
+
+        // Jalur 'per_guru' (siswa yang diajar) dibatasi hanya pada sesi miliknya sendiri
+        $teacherFilterId = $scope === 'per_guru' ? Auth::id() : null;
+
+        ['from' => $from, 'to' => $to, 'rekap' => $rekap, 'grouped' => $grouped] = $this->buildReportData($request, $student, $teacherFilterId);
+
+        // rombel ditampilkan di laporan sebagai konteks; ambil rombel pertama siswa
+        $rombel = $student->rombels()->first();
+
         $pdf = Pdf::loadView('walikelas.report.pdf', compact(
             'student', 'rombel', 'grouped', 'rekap', 'from', 'to'
         ))->setPaper('a4', 'portrait');
@@ -122,79 +240,18 @@ class WaliKelasController extends Controller
 
         return $pdf->download($filename);
     }
+
     public function previewReport(Request $request, $studentId)
     {
-        $request->validate([
-            'from' => 'required|date',
-            'to'   => 'required|date',
-        ]);
-        $from = Carbon::parse($request->from)->startOfDay();
-        $to   = Carbon::parse($request->to)->endOfDay();
-        $rombel = Rombel::where('guru_id', Auth::id())->firstOrFail();
-        $student = Student::whereHas('rombels', fn($q) => $q->where('rombels.id', $rombel->id))
-            ->findOrFail($studentId);
-        $presences = StudentPresence::where('student_id', $student->id)
-            ->whereHas('presence', fn($q) => $q->whereBetween('date', [$from, $to]))
-            ->with([
-                'presence.schedule.subject',
-                'presence.schedule.teacher',
-                'presence' 
-            ])
-            ->get()
-            ->sortBy(fn($sp) => $sp->presence->date . $sp->presence->start_time);
-        $rekap = [
-            'hadir' => $presences->where('status', 'hadir')->count(),
-            'sakit' => $presences->where('status', 'sakit')->count(),
-            'izin'  => $presences->where('status', 'izin')->count(),
-            'alpha' => $presences->where('status', 'alpha')->count(),
-            'total' => $presences->count(),
-        ];
-        $grouped = [];
-        foreach ($presences->groupBy(fn($sp) => $sp->presence->date) as $date => $items) {
-            $used    = [];
-            $mergedRows = [];
+        ['student' => $student, 'scope' => $scope] = $this->authorizeStudentAccess($request, $studentId);
 
-            foreach ($items as $sp) {
-                $id = $sp->presence_id;
-                if (in_array($id, $used)) continue;
+        $teacherFilterId = $scope === 'per_guru' ? Auth::id() : null;
 
-                $group   = [$sp];
-                $used[]  = $id;
-                $current = $sp;
-                foreach ($items as $next) {
-                    $nextId = $next->presence_id;
-                    if (in_array($nextId, $used)) continue;
-                    $sameSubject = $next->presence->schedule->subject_id === $current->presence->schedule->subject_id;
-                    $sameTeacher = $next->presence->schedule->teacher_id === $current->presence->schedule->teacher_id;
-                    $consecutive = $next->presence->start_time === $current->presence->end_time;
-                    if ($sameSubject && $sameTeacher && $consecutive) {
-                        $group[]  = $next;
-                        $used[]   = $nextId;
-                        $current  = $next;
-                    }
-                }
-                $first = $group[0];
-                $last  = end($group);
-                $priority = ['alpha' => 4, 'bolos' => 3, 'izin' => 2, 'sakit' => 1, 'hadir' => 0];
-                $worstStatus = collect($group)
-                    ->sortByDesc(fn($s) => $priority[$s->status] ?? 0)
-                    ->first()->status;
+        ['from' => $from, 'to' => $to, 'rekap' => $rekap, 'grouped' => $grouped] = $this->buildReportData($request, $student, $teacherFilterId);
 
-                $mergedRows[] = [
-                    'date'       => $date,
-                    'subject'    => $first->presence->schedule->subject->name ?? '-',
-                    'teacher'    => $first->presence->schedule->teacher->name ?? '-',
-                    'start_time' => $first->presence->start_time,
-                    'end_time'   => $last->presence->end_time,
-                    'status'     => $worstStatus,
-                    'sessions'   => count($group),
-                ];
-            }
+        $rombel = $student->rombels()->first();
 
-            $grouped[$date] = $mergedRows;
-        }
-        
         $pdf = Pdf::loadView('walikelas.report.pdf', compact('student', 'rombel', 'grouped', 'rekap', 'from', 'to'));
-    return $pdf->stream('Preview_Laporan.pdf');
-    }   
+        return $pdf->stream('Preview_Laporan.pdf');
+    }
 }

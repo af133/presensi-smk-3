@@ -70,7 +70,7 @@
                             <button @click="showModal = true; editMode = true; formUrl = '{{ route('admin.students.update', $student->id) }}'; formData = { name: '{{ $student->name }}', nisn: '{{ $student->nisn }}', rombel_id: '{{ $student->rombels->first()?->id ?? '' }}' }" 
                                     class="text-blue-600 hover:underline">Edit</button>
                             <form action="{{ route('admin.students.delete', $student->id) }}" method="POST" onsubmit="return confirm('Hapus?')">
-                                @csrf @method('DELETE')
+                                @csrf @method('POST')
                                 <button class="text-red-600 hover:underline">Hapus</button>
                             </form>
                         </td>

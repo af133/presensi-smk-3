@@ -22,17 +22,31 @@ class AutenfikasiController extends Controller
         return view('login-guru');
     }
 
-    // Memproses login
     public function login(Request $request)
     {
         $credentials = $request->validate([
             'nip' => 'required|string',
             'password' => 'required',
         ]);
-
-        if (Auth::guard('web')->attempt(['nip' => $request->nip, 'password' => $request->password], $request->boolean('remember'))) {
+        if (Auth::guard('web')->attempt(['nip' => $request->nip, 'password' => $request->password], 
+        $request->boolean('remember'))) {
             $request->session()->regenerate();
-            return redirect()->route('guru.dashboard');
+            $user = auth()->user();
+            if($user->hasPermission('can_jadwal_kelas')){
+                $route='guru.dashboard';
+            }
+            else if($user->hasPermission('can_laporan_presensi_siswa_all')||$user->hasPermission('can_laporan_presensi_siswa_perguru')||$user->hasPermission('can_laporan_presensi_siswa_guru')){
+                $route= 'guru.report.index';
+            }
+            else if ($user->hasPermission('can_laporan_presensi_guru')){
+                 $route='report.index';
+            }
+            else if ($user->hasPermission('can_monitoring_kelas')){
+                $route='monitoring.index';
+            }else{
+                $route='guru.profile.edit';
+            }
+            return redirect()->route($route);
         }
         throw ValidationException::withMessages([
             'nip' => 'NIP/NIK atau Password salah.',

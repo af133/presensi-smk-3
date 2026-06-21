@@ -57,7 +57,7 @@
                 <button @click="showModal = true; editMode = true; formUrl = '{{ route('admin.rombels.update', $rombel->id) }}'; name='{{ $rombel->name }}'; guru_id='{{ $rombel->guru_id }}'; academic_year_id='{{ $rombel->academic_year_id }}'"
                         class="flex-1 text-center bg-indigo-50 text-indigo-700 px-3 py-2 rounded-lg hover:bg-indigo-100 transition text-xs font-semibold min-w-[90px]">Edit</button>
                 <form action="{{ route('admin.rombels.delete', $rombel->id) }}" method="POST" onsubmit="return confirm('Yakin hapus?')" class="flex-1 min-w-[90px]">
-                    @csrf @method('DELETE')
+                    @csrf @method('POST')
                     <button type="submit" class="w-full bg-red-50 text-red-600 px-3 py-2 rounded-lg hover:bg-red-100 transition text-xs font-semibold">Hapus</button>
                 </form>
             </div>
@@ -99,7 +99,7 @@
                                 <button @click="showModal = true; editMode = true; formUrl = '{{ route('admin.rombels.update', $rombel->id) }}'; name='{{ $rombel->name }}'; guru_id='{{ $rombel->guru_id }}'; academic_year_id='{{ $rombel->academic_year_id }}'"
                                         class="text-indigo-600 hover:text-indigo-900 font-bold text-xs whitespace-nowrap">Edit</button>
                                 <form action="{{ route('admin.rombels.delete', $rombel->id) }}" method="POST" onsubmit="return confirm('Yakin hapus?')">
-                                    @csrf @method('DELETE')
+                                    @csrf @method('POST')
                                     <button type="submit" class="text-red-600 hover:text-red-900 font-bold text-xs whitespace-nowrap">Hapus</button>
                                 </form>
                             </div>

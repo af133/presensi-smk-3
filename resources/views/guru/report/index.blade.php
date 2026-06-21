@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="max-w-3xl mx-auto p-4 md:p-6" x-data="{ 
-    tab: '{{ $studentsTeacher->isNotEmpty() ? 'teacher' : 'all' }}',
+    tab: '{{ $studentsTeacher->isNotEmpty() ? 'teacher' : ($studentsPerGuru->isNotEmpty() ? 'perguru' : 'all') }}',
     from: '{{ request('from', now()->startOfMonth()->format('Y-m-d')) }}', 
     to: '{{ request('to', now()->format('Y-m-d')) }}',
     showModal: false,
@@ -33,7 +33,7 @@
             </div>
             
         </div>
-        <div x-show="tab === 'all'" x-cloak>
+        <div x-show="tab === 'all' || tab === 'perguru'" x-cloak>
             <label class="text-[10px] uppercase font-bold text-gray-400 mb-1 block">Pilih Rombel</label>
             <select name="rombel_id" onchange="this.form.submit()" 
                     class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-300">
@@ -46,19 +46,33 @@
             </select>
         </div>
     </form>
-    <div class="flex gap-2 mb-5 border-b border-gray-200">
-        @if ($user->hasPermission('can_laporan_presensi_siswa_guru') && $user->hasPermission('can_laporan_presensi_siswa_all'))
-            <button @click="tab = 'teacher'" :class="tab === 'teacher' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'" class="px-4 py-2 text-sm font-semibold">Wali Kelas</button>
-            <button @click="tab = 'all'" :class="tab === 'all' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'" class="px-4 py-2 text-sm font-semibold">Semua Siswa</button>
+    <div class="flex gap-2 mb-5 border-b border-gray-200 overflow-x-auto">
+        @if ($user->hasPermission('can_laporan_presensi_siswa_guru'))
+            <button @click="tab = 'teacher'" :class="tab === 'teacher' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'" class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Wali Kelas</button>
+        @endif
+        @if ($user->hasPermission('can_laporan_presensi_siswa_perguru'))
+            <button @click="tab = 'perguru'" :class="tab === 'perguru' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'" class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Siswa yang Saya Ajar</button>
+        @endif
+        @if ($user->hasPermission('can_laporan_presensi_siswa_all'))
+            <button @click="tab = 'all'" :class="tab === 'all' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'" class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Semua Siswa</button>
         @endif
     </div>
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-        <div x-show="tab === 'teacher'" x-cloak>
-            @include('guru.report.table', ['students' => $studentsTeacher])
-        </div>
-        <div x-show="tab === 'all'" x-cloak>
-            @include('guru.report.table', ['students' => $studentsAll])
-        </div>
+        @if ($user->hasPermission('can_laporan_presensi_siswa_guru'))
+            <div x-show="tab === 'teacher'" x-cloak>
+                @include('guru.report.table', ['students' => $studentsTeacher, 'scope' => 'wali_kelas'])
+            </div>
+        @endif
+        @if ($user->hasPermission('can_laporan_presensi_siswa_perguru'))
+            <div x-show="tab === 'perguru'" x-cloak>
+                @include('guru.report.table', ['students' => $studentsPerGuru, 'scope' => 'per_guru'])
+            </div>
+        @endif
+        @if ($user->hasPermission('can_laporan_presensi_siswa_all'))
+            <div x-show="tab === 'all'" x-cloak>
+                @include('guru.report.table', ['students' => $studentsAll, 'scope' => 'all'])
+            </div>
+        @endif
     </div>
     <div x-show="showModal" 
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" 

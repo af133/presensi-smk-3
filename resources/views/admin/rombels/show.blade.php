@@ -19,7 +19,7 @@
         <span class="font-bold text-indigo-900" x-text="selectedStudents.length + ' Siswa dipilih'"></span>
         <div class="flex gap-2">
             <form action="{{ route('admin.rombels.bulk-remove', $rombel->id) }}" method="POST">
-                @csrf @method('DELETE')
+                @csrf @method('POST')
                 <template x-for="id in selectedStudents"><input type="hidden" name="student_ids[]" :value="id"></template>
                 <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700">Hapus Terpilih</button>
             </form>
@@ -50,7 +50,7 @@
                     <td class="p-3">{{ $student->name }}</td>
                     <td class="p-3 text-center">
                         <form action="{{ route('admin.rombels.remove-student', [$rombel->id, $student->id]) }}" method="POST" onsubmit="return confirm('Hapus siswa ini?')">
-                            @csrf @method('DELETE')
+                            @csrf @method('POST')
                             <button type="submit" class="text-red-600 hover:text-red-800 font-bold">Hapus</button>
                         </form>
                     </td>

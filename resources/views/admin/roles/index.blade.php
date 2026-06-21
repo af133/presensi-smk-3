@@ -4,11 +4,12 @@
 @section('content')
 <div x-data="{ 
     createModal: false, editModal: false, roleName: '', roleId: '',
-    canJadwal: false, canPresensiGuru: false, canPresensiAll: false, 
-    canPresensiGuruOnly: false, canMonitoring: false, canJurnal: false,
+    canJadwal: false, canPresensiGuru: false, canPresensiPerGuru: false, // Tambahkan ini
+    canPresensiAll: false, canPresensiGuruOnly: false, canMonitoring: false, canJurnal: false,
     
     resetForm() {
         this.roleName = ''; this.canJadwal = false; this.canPresensiGuru = false;
+        this.canPresensiPerGuru = false; // Tambahkan ini
         this.canPresensiAll = false; this.canPresensiGuruOnly = false;
         this.canMonitoring = false; this.canJurnal = false;
     },
@@ -18,6 +19,7 @@
         this.roleName = role.name;
         this.canJadwal = role.can_jadwal_kelas;
         this.canPresensiGuru = role.can_laporan_presensi_siswa_guru;
+        this.canPresensiPerGuru = role.can_laporan_presensi_siswa_perguru; // Tambahkan ini
         this.canPresensiAll = role.can_laporan_presensi_siswa_all;
         this.canPresensiGuruOnly = role.can_laporan_presensi_guru;
         this.canMonitoring = role.can_monitoring_kelas;
