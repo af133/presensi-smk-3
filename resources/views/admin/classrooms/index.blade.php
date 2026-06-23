@@ -68,7 +68,7 @@
             
             <form :action="formUrl" method="POST">
                 @csrf
-                <template x-if="editMode"><input type="hidden" name="_method" value="PUT"></template>
+                <template x-if="editMode"><input type="hidden" name="_method" value="POST"></template>
                 <div class="mb-5">
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Nama</label>
                     <input type="text" name="name" x-model="name" class="w-full border border-gray-300 bg-white/50 p-3 rounded-lg focus:ring-2 focus:ring-indigo-500 transition" required>
