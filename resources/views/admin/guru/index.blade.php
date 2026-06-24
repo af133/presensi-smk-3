@@ -2,7 +2,7 @@
 @section('header', 'Manajemen Guru')
 
 @section('content')
-<div class="p-4 md:p-6">
+<div class="pb-10 md:p-4">
     <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 mb-6">
         
         <form action="{{ route('admin.guru.index') }}" method="GET" class="flex flex-col sm:flex-row gap-2">

@@ -1,14 +1,13 @@
 @extends('admin.layout')
 
 @section('content')
-<div class="p-4 md:p-6" x-data="{ 
+<div class="pb-10 md:p-6" x-data="{ 
     showModal: false, 
     editMode: false, 
     formUrl: '',
     formData: { name: '', nisn: '', rombel_id: '' }
 }">
 
-    {{-- Filter & Action Controls --}}
     <div class="mb-6 flex flex-col gap-4 bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
         <form action="{{ route('admin.students.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari NISN atau Nama..." 
@@ -44,7 +43,7 @@
     </div>
 
     {{-- Table Container --}}
-    <div class="bg-white shadow-xl rounded-xl overflow-hidden border">
+    <div class="bg-white shadow-xl  rounded-xl overflow-hidden border">
         {{-- Desktop View --}}
         <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left">
@@ -103,11 +102,11 @@
                 </div>
             </div>
             @endforeach
+            
         </div>
-
-        <div class="p-4 border-t">
-            {{ $students->links() }}
-        </div>
+    </div>
+    <div class="p-4 border-t">
+        {{ $students->links() }}
     </div>
 
     {{-- Modal --}}

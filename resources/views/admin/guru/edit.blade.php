@@ -1,8 +1,8 @@
 @extends('admin.layout')
 @section('header', 'Edit Data Guru')
 @section('content')
-<div class="p-6 max-w-2xl mx-auto">
-    <div class="bg-white p-6 rounded-lg shadow">
+<div class="md:p-4 max-w-2xl mx-auto">
+    <div class="bg-white p-3 md:p-4 rounded-lg shadow">
         <h2 class="text-2xl font-bold mb-6">Edit Data Guru</h2>
 
         <form action="{{ route('admin.guru.update', $guru->id) }}" method="POST">

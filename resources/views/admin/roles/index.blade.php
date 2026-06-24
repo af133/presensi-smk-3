@@ -25,9 +25,9 @@
         this.canMonitoring = role.can_monitoring_kelas;
         this.canJurnal = role.can_laporan_jurnal_pembelajaran;
     }
-}" class="p-6">
+}" class="space-y-6 px-0 md:px-6 pb-10">
     
-    <button @click="createModal = true; resetForm()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg mb-6 hover:bg-indigo-700">
+    <button @click="createModal = true; resetForm()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg my-6 hover:bg-indigo-700">
         + Tambah Role
     </button>
 
@@ -43,7 +43,7 @@
             <tbody>
                 @foreach($roles as $role)
                 <tr class="border-b">
-                    <td class="px-6 py-4 capitalize font-medium">{{ $role->name }}</td>
+                    <td class="px-6 py-2 capitalize font-medium">{{ $role->name }}</td>
                     
                     <td class="px-6 py-4">
                         <div class="flex flex-wrap gap-1 max-w-xs">

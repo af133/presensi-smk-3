@@ -1,4 +1,5 @@
-<aside class="h-full bg-gray-900 text-white flex flex-col w-64 overflow-y-auto">
+<aside class="h-auto md:h-full bg-gray-900 text-white flex flex-col w-full md:w-64 overflow-y-auto">
+    
     <div class="p-6 border-b border-gray-800">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center font-bold text-white shadow-lg">

@@ -1,7 +1,7 @@
 @extends('admin.layout')
 @section('header', 'Tambah Guru')
 @section('content')
-<div class="p-6 max-w-2xl mx-auto">
+<div class="md:p-4 max-w-2xl mx-auto">
     <div class="bg-white p-6 rounded-lg shadow">
 
         <form action="{{ route('admin.guru.store') }}" method="POST">

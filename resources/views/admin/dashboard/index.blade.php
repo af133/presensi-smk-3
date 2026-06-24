@@ -3,7 +3,7 @@
 @section('header', 'Dashboard Utama')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6 pb-10">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <div class="bg-white p-5 md:p-6 rounded-xl shadow-sm border border-gray-100">
             <h3 class="text-[10px] md:text-xs text-gray-500 uppercase font-bold tracking-wider">Total Siswa</h3>
@@ -23,7 +23,7 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-7">
         <div class="p-4 md:p-6 border-b border-gray-100">
             <h3 class="font-bold text-gray-700 text-sm md:text-base">Aktivitas Mengajar Terbaru</h3>
         </div>
