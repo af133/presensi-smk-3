@@ -1,9 +1,9 @@
 @extends('admin.layout')
 
-@section('header', 'Manajemen Mata Pelajaran')
+@section('header', 'Manajemen Ruangan')
 
 @section('content')
-<div class="p-6" x-data="{
+<div class="pb-15 md:p-6" x-data="{
     showModal: false,
     editMode: false,
     formUrl: '',
@@ -11,8 +11,6 @@
 }">
 
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        <h2 class="text-xl font-bold text-gray-800">Daftar Ruang Kelas</h2>
-
         <form action="{{ route('admin.classrooms.index') }}" method="GET" class="flex gap-2 w-full md:w-auto">
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama..."
                    class="w-full md:w-64 border border-gray-300 rounded-lg px-4 py-2 bg-white/50 focus:ring-2 focus:ring-indigo-500 outline-none">
@@ -58,7 +56,7 @@
         </table>
     </div>
 
-    <div class="p-4 border-t">
+    <div class="p-5">
         {{ $classrooms->links() }}
     </div>
 

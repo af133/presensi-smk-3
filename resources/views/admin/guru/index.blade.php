@@ -83,10 +83,9 @@
                 </tbody>
             </table>
         </div>
-        
-        <div class="p-4 bg-gray-50 border-t">
-            {{ $gurus->links() }}
-        </div>
+    </div>
+    <div class="p-4">
+        {{ $gurus->links() }}
     </div>
 </div>
 @endsection

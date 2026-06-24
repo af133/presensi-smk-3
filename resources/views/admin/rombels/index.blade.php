@@ -3,7 +3,7 @@
 @section('header', 'Manajemen Rombongan Belajar')
 
 @section('content')
-<div class="p-4 md:p-6" x-data="{ 
+<div class="pb-15 md:p-6" x-data="{ 
     showModal: false, 
     editMode: false, 
     formUrl: '',
@@ -113,7 +113,7 @@
         </div>
     </div>
 
-    <div class="mt-4 flex justify-center sm:justify-start">
+    <div class="mt-4 ">
         {{ $rombels->links() }}
     </div>
 

@@ -3,7 +3,7 @@
 @section('header', 'Manajemen Hari & Jadwal')
 
 @section('content')
-<div class="p-6">
+<div class="pb-15 md:p-6">
     <div class="mb-6">
         <h2 class="text-xl font-bold text-gray-800">Daftar Hari</h2>
         <p class="text-gray-600 text-sm">Pilih hari untuk mengelola jadwal pelajaran.</p>

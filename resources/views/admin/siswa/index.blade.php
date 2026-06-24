@@ -105,7 +105,7 @@
             
         </div>
     </div>
-    <div class="p-4 border-t">
+    <div class="p-4 ">
         {{ $students->links() }}
     </div>
 

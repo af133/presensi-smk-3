@@ -3,16 +3,14 @@
 @section('header', 'Manajemen Tahun Akademik')
 
 @section('content')
-<div class="p-6" x-data="{ 
+<div class="pb-10 md:p-6" x-data="{ 
     showModal: false, 
     editMode: false, 
     formUrl: '',
     name: '',
     is_active: false 
 }">
-    
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        <h2 class="text-xl font-bold text-gray-800">Daftar Tahun Akademik</h2>
         
         <form action="{{ route('admin.academic-years.index') }}" method="GET" class="flex gap-2 w-full md:w-auto">
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari tahun..." 
@@ -62,7 +60,7 @@
         </table>
     </div>
 
-    <div class="p-4 border-t">
+    <div class="p-4">
         {{ $years->links() }}
     </div>
 

@@ -2,7 +2,7 @@
 @section('header', 'Daftar Jam Pelajaran')
 
 @section('content')
-<div class="p-6" x-data="{ 
+<div class="pb-11 md:p-6" x-data="{ 
     showModal: false, 
     editMode: false, 
     formUrl: '',
@@ -66,7 +66,7 @@
             </table>
         </div>
     </div>
-    <div class="mt-4">
+    <div class="py-4">
         {{ $times->links() }}
     </div>
 
