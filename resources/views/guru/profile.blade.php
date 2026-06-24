@@ -1,15 +1,13 @@
 @extends('guru.layout')
 
 @section('content')
-<div class="max-w-xl mx-auto p-6">
-    <h2 class="text-2xl font-bold mb-6 text-gray-800">Edit Profil Saya</h2>
+<div class="max-w-xl mx-auto pb-10 md:p-6">
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <form action="{{ route('guru.profile.update') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('POST')
 
-            <!-- Foto Profil -->
             <div class="mb-6 flex flex-col items-center">
                 <div class="w-24 h-24 rounded-full bg-gray-100 overflow-hidden mb-3 border-2 border-white shadow-md">
                     @if($user->photo)

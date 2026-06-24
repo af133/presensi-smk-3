@@ -1,7 +1,7 @@
 @extends('guru.layout')
 
 @section('content')
-<div class="max-w-3xl mx-auto p-4 md:p-6" x-data="{ 
+<div class="max-w-3xl mx-auto  md:p-6" x-data="{ 
     tab: '{{ $studentsTeacher->isNotEmpty() ? 'teacher' : ($studentsPerGuru->isNotEmpty() ? 'perguru' : 'all') }}',
     from: '{{ request('from', now()->startOfMonth()->format('Y-m-d')) }}', 
     to: '{{ request('to', now()->format('Y-m-d')) }}',

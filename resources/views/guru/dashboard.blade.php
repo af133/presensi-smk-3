@@ -1,9 +1,8 @@
 @extends('guru.layout')
 
 @section('content')
-<div class="max-w-3xl mx-auto p-4 md:p-6 pb-10" x-data="dashboard()">
+<div class="max-w-3xl mx-auto pb-10 md:p-6 pb-10" x-data="dashboard()">
 
-    {{-- ===== KARTU SELAMAT DATANG ===== --}}
     <div class="relative overflow-hidden rounded-2xl bg-slate-900 p-5 md:p-7 mb-5 shadow-sm">
         <div class="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-indigo-500/20"></div>
         <div class="absolute -right-2 bottom-0 w-20 h-20 rounded-full bg-amber-400/10"></div>
