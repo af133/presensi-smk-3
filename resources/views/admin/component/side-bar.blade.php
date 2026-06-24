@@ -1,4 +1,4 @@
-<aside class="h-screen md:h-full bg-gray-900 text-white flex flex-col w-full md:w-64 overflow-y-auto">
+<aside class="h-[100dvh] bg-gray-900 text-white flex flex-col w-full md:w-64 overflow-y-auto hide-scrollbar">
     
     <div class="p-6 border-b border-gray-800">
         <div class="flex items-center gap-3">

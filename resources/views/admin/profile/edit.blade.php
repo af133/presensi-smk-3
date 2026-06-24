@@ -3,7 +3,7 @@
 @section('header', 'Edit Profil Saya')
 
 @section('content')
-<div class="max-w-2xl mx-auto p-6">
+<div class="max-w-2xl mx-auto pb-10 md:p-6">
     @if(session('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-6">
             {{ session('success') }}
