@@ -298,7 +298,7 @@ class PresensiController extends Controller
 
         return Pdf::loadView('waka.report.pdf', compact('teacher', 'grouped', 'rekap', 'from', 'to'))
                     ->setPaper('a4', 'portrait')
-                    ->output(); // Penting: gunakan output() untuk mendapatkan binary string PDF
+                    ->output(); 
     }
     public function downloadReportGuru(Request $request, $teacherId)
     {

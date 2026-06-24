@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Denah Satelit SMKN 3 Jember</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="icon" type="image/png" href="{{ asset('storage/icon/logo-smk3.png') }}">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
@@ -30,7 +32,7 @@
                 <h1 class="text-lg md:text-xl font-bold text-slate-800">SMKN 3 Jember</h1>
                 <p class="text-xs md:text-sm text-slate-600 mt-1">Peta interaktif area sekolah.</p>
             </div>
-            <img src="{{ asset('build/assets/icon/smk3.png') }}" alt="Logo" class="w-12 h-12 object-contain">
+            <img src="{{ asset('storage/icon/logo-smk3.png') }}" alt="Logo" class="w-12 h-12 object-contain">
         </div>
     </div>
 
@@ -51,10 +53,6 @@
             <span class="font-semibold text-slate-700 group-hover:text-white">Login Guru</span>
             <span>➔</span>
         </a>
-
-        <button onclick="document.getElementById('login-panel').style.display='none'" class="text-xs text-slate-400 mt-2 hover:text-slate-600">
-            Tutup
-        </button>
     </div>
 
     <div id="map"></div>

@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Admin | Dasbor</title>
-    <link rel="icon" type="image/png" href="{{ asset('build/assets/icon/smk3.png') }}">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="icon" type="image/png" href="{{ asset('storage/icon/logo-smk3.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="h-full bg-cover bg-center bg-no-repeat" style="background-image: url('https://tugujatim.id/wp-content/uploads/2024/05/a1131603-9b3e-48c5-bf3d-c14c912975aa-1-4.jpeg');">
@@ -15,7 +16,7 @@
             
             <div class="sm:mx-auto sm:w-full sm:max-w-sm text-center">
                 <div class="mx-auto h-16 w-16 mb-4">
-                    <img src="{{ asset('build/assets/icon/smk3.png') }}" alt="Logo SMK" class="w-full h-full object-contain">
+                    <img src="{{ asset('storage/icon/logo-smk3.png') }}" alt="Logo SMK" class="w-full h-full object-contain">
                 </div>
                 <h2 class="text-2xl font-bold tracking-tight text-white">Portal Admin</h2>
                 <p class="mt-2 text-sm text-gray-400">Silakan masukkan kredensial Anda untuk melanjutkan</p>
