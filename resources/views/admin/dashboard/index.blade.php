@@ -40,8 +40,8 @@
                 <tbody class="divide-y divide-gray-100">
                     @forelse($recent_journals as $journal)
                     <tr class="hover:bg-gray-50 transition text-sm">
-                        <td class="px-4 md:px-6 py-4 font-semibold text-gray-800">{{ $journal->presence->schedule->subject->name ?? '-' }}</td>
-                        <td class="px-4 md:px-6 py-4 text-gray-600">{{ $journal->presence->schedule->teacher->name ?? '-' }}</td>
+                        <td class="px-4 md:px-6 py-4 font-semibold text-gray-800">{{ $journal->presence->subject_name ?? '-' }}</td>
+                        <td class="px-4 md:px-6 py-4 text-gray-600">{{ $journal->presence->user->name ?? '-' }}</td>
                         <td class="px-4 md:px-6 py-4 text-gray-600 max-w-[150px] truncate">{{ Str::limit($journal->topic, 30) }}</td>
                         <td class="px-4 md:px-6 py-4 text-gray-500">{{ $journal->created_at->format('H:i') }}</td>
                     </tr>

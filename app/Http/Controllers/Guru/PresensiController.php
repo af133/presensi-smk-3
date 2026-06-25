@@ -21,27 +21,34 @@ use App\Models\Room;
 
 class PresensiController extends Controller
 {
-    
+    private function findPresenceForSchedule($schedule, string $date)
+    {
+        return Presence::where('user_id', $schedule->teacher_id)
+            ->where('date', $date)
+            ->where('subject_name', $schedule->subject->name ?? null)
+            ->where('rombel_name', $schedule->rombel->name ?? null)
+            ->where('classroom_name', $schedule->classroom->name ?? null)
+            ->where('start_time', $schedule->time->start_time ?? null)
+            ->with('journal')
+            ->first();
+    }
+
     public function index(Request $request)
     {
         $date = $request->input('date', Carbon::today()->format('Y-m-d'));
         $currentDate = Carbon::parse($date)->startOfDay();
-
         $weekStart = $currentDate->copy()->startOfWeek(Carbon::MONDAY);
         $dates = collect(range(0, 6))->map(fn($i) => $weekStart->copy()->addDays($i));
         $dayId = $currentDate->dayOfWeekIso;
-
         $schedules = Schedule::where('teacher_id', Auth::id())
             ->whereHas('time', fn($q) => $q->where('day_id', $dayId))
             ->with(['time', 'subject', 'classroom', 'rombel'])
             ->get()
             ->sortBy('time.start_time');
         $schedules->each(function ($schedule) use ($date) {
-            $schedule->presence = Presence::where('schedule_id', $schedule->id)
-                ->where('date', $date)
-                ->with('journal')
-                ->first();
+            $schedule->presence = $this->findPresenceForSchedule($schedule, $date);
         });
+
         $merged = collect();
         $used = collect();
 
@@ -93,7 +100,7 @@ class PresensiController extends Controller
             ->where('subject_id',   $schedule->subject_id)
             ->where('classroom_id', $schedule->classroom_id)
             ->whereHas('time', fn($q) => $q->where('day_id', $dayId))
-            ->with('time')
+            ->with(['time', 'subject', 'classroom', 'rombel'])
             ->get()
             ->sortBy('time.start_time');
         $sessions = collect();
@@ -124,10 +131,10 @@ class PresensiController extends Controller
             ->orderBy('name')
             ->get();
         $sessionData = $sessions->map(function ($sess) use ($date, $students) {
-            $presence = Presence::where('schedule_id', $sess->id)
-                ->where('date', $date)
-                ->with('studentPresences')
-                ->first();
+            $presence = $this->findPresenceForSchedule($sess, $date);
+            if ($presence) {
+                $presence->load('studentPresences');
+            }
             $statusMap = $presence
                 ? $presence->studentPresences->keyBy('student_id')->map->status
                 : collect();
@@ -155,20 +162,34 @@ class PresensiController extends Controller
 
         $date = $request->input('date');
         $scheduleIds = array_keys($request->input('presences'));
-        
+
         DB::transaction(function () use ($request, $date, $scheduleIds) {
             foreach ($scheduleIds as $sessScheduleId) {
-                $schedule= Schedule::where('id',$sessScheduleId)->first();
+                $schedule = Schedule::with(['time', 'subject', 'classroom', 'rombel'])
+                    ->find($sessScheduleId);
+
+                if (!$schedule) {
+                    continue;
+                }
+
                 $rows = $request->input("presences.{$sessScheduleId}", []);
+
                 $presence = Presence::firstOrCreate(
-                    ['schedule_id' => $sessScheduleId, 'date' => $date],
                     [
-                        'user_id'       => Auth::id(),
-                        'check_in_time' => now()->toTimeString(),
-                        'start_time' => $schedule->time->start_time,
-                        'end_time' => $schedule->time->end_time
+                        'user_id'        => Auth::id(),
+                        'date'           => $date,
+                        'subject_name'   => $schedule->subject->name ?? null,
+                        'rombel_name'    => $schedule->rombel->name ?? null,
+                        'classroom_name' => $schedule->classroom->name ?? null,
+                        'start_time'     => $schedule->time->start_time ?? null,
+                    ],
+                    [
+                        'check_in_time'  => now()->toTimeString(),
+                        'end_time'       => $schedule->time->end_time ?? null,
+                        'academic_years' => $schedule->rombel->academicYear->name ?? null,
                     ]
                 );
+
                 foreach ($rows as $row) {
                     StudentPresence::updateOrCreate(
                         [
@@ -185,6 +206,7 @@ class PresensiController extends Controller
             ->route('guru.dashboard', ['date' => $date])
             ->with('success', 'Presensi berhasil disimpan.');
     }
+
     public function storeJournal(Request $request, $presenceId)
     {
         $request->validate([
@@ -205,7 +227,7 @@ class PresensiController extends Controller
     {
         $teachers = User::whereHas('roles', fn($q) => $q->where('name', 'guru'))
             ->orderBy('name')
-            ->paginate(10); 
+            ->paginate(10);
 
         return view('guru.report.guru', compact('teachers'));
     }
@@ -227,17 +249,17 @@ class PresensiController extends Controller
 
         return response()->download($zipPath)->deleteFileAfterSend(true);
     }
-    private function generatePdfContent($teacher, $fromInput, $toInput)
+
+    private function buildTeacherReportData($teacher, $fromInput, $toInput)
     {
         $from = Carbon::parse($fromInput)->startOfDay();
         $to   = Carbon::parse($toInput)->endOfDay();
 
         $presences = Presence::where('user_id', $teacher->id)
             ->whereBetween('date', [$from, $to])
-            ->with(['schedule.subject', 'schedule.time', 'journal', 'schedule.rombel', 'schedule.classroom'])
+            ->with('journal')
             ->get()
-            ->filter(fn($p) => $p->schedule !== null && $p->schedule->time !== null)
-            ->sortBy(fn($p) => $p->date . $p->schedule->time->start_time);
+            ->sortBy(fn($p) => $p->date . $p->start_time);
 
         $allScheduledDays = Schedule::where('teacher_id', $teacher->id)
             ->with('time')
@@ -263,120 +285,24 @@ class PresensiController extends Controller
             $used = [];
             $mergedRows = [];
             foreach ($items as $presence) {
-                if (in_array($presence->id, $used) || !$presence->schedule) continue;
-                
+                if (in_array($presence->id, $used)) continue;
+
                 $group = [$presence];
                 $used[] = $presence->id;
                 $current = $presence;
 
                 foreach ($items as $next) {
-                    if (in_array($next->id, $used) || !$next->schedule) continue;
-                    if ($next->schedule->subject_id === $current->schedule->subject_id &&
-                        $next->schedule->rombel_id === $current->schedule->rombel_id &&
-                        $next->schedule->classroom_id === $current->schedule->classroom_id &&
-                        $next->start_time === $current->end_time) {
+                    if (in_array($next->id, $used)) continue;
+
+                    $sameSubject = $next->subject_name === $current->subject_name;
+                    $sameRombel  = $next->rombel_name === $current->rombel_name;
+                    $sameClass   = $next->classroom_name === $current->classroom_name;
+                    $consecutive = $next->start_time === $current->end_time;
+
+                    if ($sameSubject && $sameRombel && $sameClass && $consecutive) {
                         $group[] = $next;
                         $used[] = $next->id;
                         $current = $next;
-                    }
-                }
-                
-                $first = $group[0];
-                $mergedRows[] = [
-                    'check_in'  => $first->check_in_time,
-                    'subject'   => $first->schedule->subject->name ?? '-',
-                    'rombel'    => $first->schedule->rombel->name ?? '-',
-                    'classroom' => $first->schedule->classroom->name ?? '-',
-                    'start'     => $first->start_time,
-                    'end'       => end($group)->end_time,
-                    'topic'     => $first->journal->topic ?? '-',
-                    'sessions'  => count($group),
-                ];
-            }
-            $grouped[$date] = $mergedRows;
-        }
-
-        return Pdf::loadView('waka.report.pdf', compact('teacher', 'grouped', 'rekap', 'from', 'to'))
-                    ->setPaper('a4', 'portrait')
-                    ->output(); 
-    }
-    public function downloadReportGuru(Request $request, $teacherId)
-    {
-        $request->validate([
-            'from' => 'required|date',
-            'to'   => 'required|date|after_or_equal:from',
-        ]);
-
-        $from = Carbon::parse($request->from)->startOfDay();
-        $to   = Carbon::parse($request->to)->endOfDay();
-
-        $teacher = User::whereHas('roles', fn($q) => $q->where('name', 'guru'))
-            ->findOrFail($teacherId);
-
-        $presences = Presence::where('user_id', $teacher->id)
-            ->whereBetween('date', [$from, $to])
-            ->with([
-                'schedule.subject',
-                'schedule.time',
-                'journal',
-                'schedule.rombel',
-                'schedule.classroom',
-            ])
-            ->get()
-            ->filter(fn($p) => $p->schedule !== null && $p->schedule->time !== null)
-            ->sortBy(fn($p) => $p->date . $p->schedule->time->start_time);
-
-        $allScheduledDays = Schedule::where('teacher_id', $teacher->id)
-            ->with('time')
-            ->get()
-            ->filter(fn($s) => $s->time !== null); 
-
-        $expectedCount = 0;
-        $currentDay = $from->copy();
-        while ($currentDay->lte($to)) {
-            $dayId = $currentDay->dayOfWeekIso;
-            $expectedCount += $allScheduledDays->filter(
-                fn($s) => $s->time->day_id == $dayId
-            )->count();
-            $currentDay->addDay();
-        }
-
-        $rekap = [
-            'hadir' => $presences->count(),
-            'tidak' => max(0, $expectedCount - $presences->count()),
-            'total' => $expectedCount,
-        ];
-
-        $grouped = [];
-
-        foreach ($presences->groupBy('date') as $date => $items) {
-            $used       = [];
-            $mergedRows = [];
-
-            foreach ($items as $presence) {
-                $id = $presence->id;
-                if (in_array($id, $used)) continue;
-
-                if ($presence->schedule === null) continue;
-
-                $group   = [$presence];
-                $used[]  = $id;
-                $current = $presence;
-
-                foreach ($items as $next) {
-                    $nextId = $next->id;
-                    if (in_array($nextId, $used)) continue;
-                    if ($next->schedule === null) continue;
-
-                    $sameSubject = $next->schedule->subject_id   === $current->schedule->subject_id;
-                    $sameRombel  = $next->schedule->rombel_id    === $current->schedule->rombel_id;
-                    $sameClass   = $next->schedule->classroom_id === $current->schedule->classroom_id;
-                    $consecutive = $next->start_time             === $current->end_time;
-
-                    if ($sameSubject && $sameRombel && $sameClass && $consecutive) {
-                        $group[]  = $next;
-                        $used[]   = $nextId;
-                        $current  = $next;
                     }
                 }
 
@@ -385,18 +311,43 @@ class PresensiController extends Controller
 
                 $mergedRows[] = [
                     'check_in'  => $first->check_in_time,
-                    'subject'   => $first->schedule->subject->name   ?? '-',
-                    'rombel'    => $first->schedule->rombel->name    ?? '-',
-                    'classroom' => $first->schedule->classroom->name ?? '-',
+                    'subject'   => $first->subject_name ?? '-',
+                    'rombel'    => $first->rombel_name ?? '-',
+                    'classroom' => $first->classroom_name ?? '-',
                     'start'     => $first->start_time,
                     'end'       => $last->end_time,
-                    'topic'     => $first->journal->topic            ?? '-',
+                    'topic'     => $first->journal->topic ?? '-',
                     'sessions'  => count($group),
                 ];
             }
-
             $grouped[$date] = $mergedRows;
         }
+
+        return compact('from', 'to', 'rekap', 'grouped');
+    }
+
+    private function generatePdfContent($teacher, $fromInput, $toInput)
+    {
+        ['from' => $from, 'to' => $to, 'rekap' => $rekap, 'grouped' => $grouped] =
+            $this->buildTeacherReportData($teacher, $fromInput, $toInput);
+
+        return Pdf::loadView('waka.report.pdf', compact('teacher', 'grouped', 'rekap', 'from', 'to'))
+                    ->setPaper('a4', 'portrait')
+                    ->output();
+    }
+
+    public function downloadReportGuru(Request $request, $teacherId)
+    {
+        $request->validate([
+            'from' => 'required|date',
+            'to'   => 'required|date|after_or_equal:from',
+        ]);
+
+        $teacher = User::whereHas('roles', fn($q) => $q->where('name', 'guru'))
+            ->findOrFail($teacherId);
+
+        ['from' => $from, 'to' => $to, 'rekap' => $rekap, 'grouped' => $grouped] =
+            $this->buildTeacherReportData($teacher, $request->from, $request->to);
 
         $pdf = Pdf::loadView('waka.report.pdf', compact(
             'teacher', 'grouped', 'rekap', 'from', 'to'
@@ -414,99 +365,11 @@ class PresensiController extends Controller
             'to'   => 'required|date|after_or_equal:from',
         ]);
 
-        $from = Carbon::parse($request->from)->startOfDay();
-        $to   = Carbon::parse($request->to)->endOfDay();
-
         $teacher = User::whereHas('roles', fn($q) => $q->where('name', 'guru'))
             ->findOrFail($teacherId);
 
-        $presences = Presence::where('user_id', $teacher->id)
-            ->whereBetween('date', [$from, $to])
-            ->with([
-                'schedule.subject',
-                'schedule.time',
-                'journal',
-                'schedule.rombel',
-                'schedule.classroom',
-            ])
-            ->get()
-            ->filter(fn($p) => $p->schedule !== null && $p->schedule->time !== null) // guard
-            ->sortBy(fn($p) => $p->date . $p->schedule->time->start_time);
-
-        $allScheduledDays = Schedule::where('teacher_id', $teacher->id)
-            ->with('time')
-            ->get()
-            ->filter(fn($s) => $s->time !== null); 
-
-        $expectedCount = 0;
-        $currentDay = $from->copy();
-        while ($currentDay->lte($to)) {
-            $dayId = $currentDay->dayOfWeekIso;
-            $expectedCount += $allScheduledDays->filter(
-                fn($s) => $s->time->day_id == $dayId
-            )->count();
-            $currentDay->addDay();
-        }
-
-        $rekap = [
-            'hadir' => $presences->count(),
-            'tidak' => max(0, $expectedCount - $presences->count()),
-            'total' => $expectedCount,
-        ];
-
-        $grouped = [];
-
-        foreach ($presences->groupBy('date') as $date => $items) {
-            $used       = [];
-            $mergedRows = [];
-
-            foreach ($items as $presence) {
-                $id = $presence->id;
-                if (in_array($id, $used)) continue;
-
-                // Guard relasi presence
-                if ($presence->schedule === null) continue;
-
-                $group   = [$presence];
-                $used[]  = $id;
-                $current = $presence;
-
-                foreach ($items as $next) {
-                    $nextId = $next->id;
-                    if (in_array($nextId, $used)) continue;
-
-                    // Guard relasi next
-                    if ($next->schedule === null) continue;
-
-                    $sameSubject = $next->schedule->subject_id   === $current->schedule->subject_id;
-                    $sameRombel  = $next->schedule->rombel_id    === $current->schedule->rombel_id;
-                    $sameClass   = $next->schedule->classroom_id === $current->schedule->classroom_id;
-                    $consecutive = $next->start_time             === $current->end_time;
-
-                    if ($sameSubject && $sameRombel && $sameClass && $consecutive) {
-                        $group[]  = $next;
-                        $used[]   = $nextId;
-                        $current  = $next;
-                    }
-                }
-
-                $first = $group[0];
-                $last  = end($group);
-
-                $mergedRows[] = [
-                    'check_in'  => $first->check_in_time,
-                    'subject'   => $first->schedule->subject->name   ?? '-',
-                    'rombel'    => $first->schedule->rombel->name    ?? '-',
-                    'classroom' => $first->schedule->classroom->name ?? '-',
-                    'start'     => $first->start_time,
-                    'end'       => $last->end_time,
-                    'topic'     => $first->journal->topic            ?? '-',
-                    'sessions'  => count($group),
-                ];
-            }
-
-            $grouped[$date] = $mergedRows;
-        }
+        ['from' => $from, 'to' => $to, 'rekap' => $rekap, 'grouped' => $grouped] =
+            $this->buildTeacherReportData($teacher, $request->from, $request->to);
 
         $pdf = Pdf::loadView('waka.report.pdf', compact(
             'teacher', 'grouped', 'rekap', 'from', 'to'
@@ -514,7 +377,8 @@ class PresensiController extends Controller
 
         return $pdf->stream('Preview_Laporan_' . $teacher->name . '.pdf');
     }
-      public function monitoringIndex(Request $request)
+
+    public function monitoringIndex(Request $request)
     {
         $today = Carbon::now();
         $dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
@@ -527,7 +391,7 @@ class PresensiController extends Controller
             $selectedDay = Day::where('name', $currentDayName)->first()
                 ?? $days->first();
         }
- 
+
         if (!$selectedDay) {
             return view('monitoring.index', [
                 'days' => $days,
@@ -539,12 +403,12 @@ class PresensiController extends Controller
                 'currentDayName' => $currentDayName,
             ]);
         }
- 
+
         $timeSlots = TimeSlot::where('day_id', $selectedDay->id)
             ->orderBy('start_time')
             ->get();
         $classrooms = Classroom::orderBy('name')->get();
- 
+
         $schedules = Schedule::with(['rombel', 'subject', 'teacher', 'classroom', 'time'])
             ->whereHas('time', function ($q) use ($selectedDay) {
                 $q->where('day_id', $selectedDay->id);
@@ -552,42 +416,49 @@ class PresensiController extends Controller
             ->get();
         $isToday = $selectedDay->name === $currentDayName;
         $todayDate = $today->toDateString();
- 
-        $presences = collect();
+        $presencesToday = collect();
         if ($isToday) {
-            $scheduleIds = $schedules->pluck('id');
-            $presences = Presence::whereIn('schedule_id', $scheduleIds)
-                ->where('date', $todayDate)
-                ->get()
-                ->keyBy('schedule_id');
+            $presencesToday = Presence::where('date', $todayDate)
+                ->whereIn('user_id', $schedules->pluck('teacher_id')->unique())
+                ->get();
         }
- 
+
+        $findPresence = function ($schedule) use ($presencesToday) {
+            return $presencesToday->first(function ($p) use ($schedule) {
+                return $p->user_id === $schedule->teacher_id
+                    && $p->subject_name === ($schedule->subject->name ?? null)
+                    && $p->rombel_name === ($schedule->rombel->name ?? null)
+                    && $p->classroom_name === ($schedule->classroom->name ?? null)
+                    && $p->start_time === ($schedule->time->start_time ?? null);
+            });
+        };
+
         $grid = [];
         foreach ($timeSlots as $slot) {
             $grid[$slot->id] = [];
             foreach ($classrooms as $room) {
                 $grid[$slot->id][$room->id] = [
-                    'status'   => 'kosong',   
+                    'status'   => 'kosong',
                     'schedule' => null,
                     'presence' => null,
                     'label'    => 'Tidak Ada Kegiatan',
                 ];
             }
         }
- 
+
         foreach ($schedules as $schedule) {
             $slotId = $schedule->time_slot_id;
             $roomId = $schedule->classroom_id;
- 
+
             if (!isset($grid[$slotId][$roomId])) {
                 continue;
             }
- 
-            $presence = $presences->get($schedule->id);
+
+            $presence = $isToday ? $findPresence($schedule) : null;
             if ($isToday) {
                 $now = $today->format('H:i:s');
                 $slotObj = $timeSlots->firstWhere('id', $slotId);
- 
+
                 if ($presence) {
                     $status = 'aktif';
                     $label  = $schedule->subject->name ?? '-';
@@ -605,7 +476,7 @@ class PresensiController extends Controller
                 $status = 'terjadwal';
                 $label  = $schedule->subject->name ?? '-';
             }
- 
+
             $grid[$slotId][$roomId] = [
                 'status'   => $status,
                 'schedule' => $schedule,
@@ -613,7 +484,7 @@ class PresensiController extends Controller
                 'label'    => $label,
             ];
         }
- 
+
         return view('monitoring.index', compact(
             'days',
             'selectedDay',
@@ -625,7 +496,9 @@ class PresensiController extends Controller
             'isToday'
         ));
     }
-    public function denahIndex(){
+
+    public function denahIndex()
+    {
         $maps = Room::select(
             'id',
             'name',
@@ -633,6 +506,6 @@ class PresensiController extends Controller
             'floor',
             DB::raw('ST_AsGeoJSON(coordinates) as geojson')
         )->get();
-     return view('denah',compact('maps'));   
+        return view('denah', compact('maps'));
     }
 }

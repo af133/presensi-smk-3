@@ -22,7 +22,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('roles', function (Blueprint $table) {
-            // Menghapus kolom jika rollback
             $table->dropColumn('can_laporan_presensi_siswa_perguru');
         });
     }

@@ -28,10 +28,9 @@ class AdminController extends Controller
             'presensi_hari_ini' => Presence::whereDate('date', today())->count(),
         ];
 
-        // Mengambil 5 jurnal terbaru
-        $recent_journals = Journal::with(['presence.schedule.subject', 'presence.schedule.teacher'])
+        $recent_journals = Journal::with( 'presence.user')
             ->latest()
-            ->take(5)
+            ->take(10)
             ->get();
 
         return view('admin.dashboard.index', compact('stats', 'recent_journals'));

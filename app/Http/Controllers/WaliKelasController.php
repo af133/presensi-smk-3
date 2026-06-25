@@ -8,6 +8,7 @@ use App\Models\Student;
 use App\Models\Rombel;
 use App\Models\Schedule;
 use App\Models\StudentPresence;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -56,7 +57,7 @@ class WaliKelasController extends Controller
                 $studentsPerGuru = Student::whereHas('rombels', fn($q) => $q->whereIn('rombels.id', $rombelIds))
                     ->when($rombelId, fn($q) => $q->whereHas('rombels', fn($q) => $q->where('rombels.id', $rombelId)))
                     ->when($search, fn($q) => $q->where('name', 'like', "%{$search}%")->orWhere('nisn', 'like', "%{$search}%"))
-                    ->with('rombels') 
+                    ->with('rombels')
                     ->orderBy('name')
                     ->distinct()
                     ->paginate(20, ['*'], 'page_perguru')->withQueryString();
@@ -66,7 +67,7 @@ class WaliKelasController extends Controller
         return view('guru.report.index', compact('studentsAll', 'studentsTeacher', 'studentsPerGuru', 'rombels', 'user'));
     }
 
-  
+
     private function authorizeStudentAccess(Request $request, $studentId): array
     {
         $user = Auth::user();
@@ -133,9 +134,7 @@ class WaliKelasController extends Controller
     /**
      * @param Request $request
      * @param Student $student
-     * @param int|null $teacherId 
-     *                            
-     *                            
+     * @param int|null $teacherId
      */
     private function buildReportData(Request $request, Student $student, ?int $teacherId = null)
     {
@@ -150,13 +149,12 @@ class WaliKelasController extends Controller
             ->whereHas('presence', function ($q) use ($from, $to, $teacherId) {
                 $q->whereBetween('date', [$from, $to]);
                 if ($teacherId) {
-                    $q->whereHas('schedule', fn($q) => $q->where('teacher_id', $teacherId));
+                    $q->where('user_id', $teacherId);
                 }
             })
             ->with([
-                'presence.schedule.subject',
-                'presence.schedule.teacher',
-                'presence'
+                'presence.user',
+                'presence',
             ])
             ->get()
             ->sortBy(fn($sp) => $sp->presence->date . $sp->presence->start_time);
@@ -184,8 +182,8 @@ class WaliKelasController extends Controller
                 foreach ($items as $next) {
                     $nextId = $next->presence_id;
                     if (in_array($nextId, $used)) continue;
-                    $sameSubject = $next->presence->schedule->subject_id === $current->presence->schedule->subject_id;
-                    $sameTeacher = $next->presence->schedule->teacher_id === $current->presence->schedule->teacher_id;
+                    $sameSubject = $next->presence->subject_name === $current->presence->subject_name;
+                    $sameTeacher = $next->presence->user_id === $current->presence->user_id;
                     $consecutive = $next->presence->start_time === $current->presence->end_time;
                     if ($sameSubject && $sameTeacher && $consecutive) {
                         $group[]  = $next;
@@ -201,13 +199,16 @@ class WaliKelasController extends Controller
                     ->first()->status;
 
                 $mergedRows[] = [
-                    'date'       => $date,
-                    'subject'    => $first->presence->schedule->subject->name ?? '-',
-                    'teacher'    => $first->presence->schedule->teacher->name ?? '-',
-                    'start_time' => $first->presence->start_time,
-                    'end_time'   => $last->presence->end_time,
-                    'status'     => $worstStatus,
-                    'sessions'   => count($group),
+                    'date'           => $date,
+                    'subject'        => $first->presence->subject_name ?? '-',
+                    'teacher'        => $first->presence->user->name ?? '-',
+                    'rombel'         => $first->presence->rombel_name ?? '-',
+                    'classroom'      => $first->presence->classroom_name ?? '-',
+                    'academic_year'  => $first->presence->academic_years ?? '-',
+                    'start_time'     => $first->presence->start_time,
+                    'end_time'       => $last->presence->end_time,
+                    'status'         => $worstStatus,
+                    'sessions'       => count($group),
                 ];
             }
 
@@ -223,10 +224,15 @@ class WaliKelasController extends Controller
         $teacherFilterId = $scope === 'per_guru' ? Auth::id() : null;
 
         ['from' => $from, 'to' => $to, 'rekap' => $rekap, 'grouped' => $grouped] = $this->buildReportData($request, $student, $teacherFilterId);
-        $rombel = $student->rombels()->first();
+        $lastRow = collect($grouped)->flatten(1)->last();
+        $rombelInfo = [
+            'name'          => $lastRow['rombel'] ?? '-',
+            'classroom'     => $lastRow['classroom'] ?? '-',
+            'academic_year' => $lastRow['academic_year'] ?? '-',
+        ];
 
         $pdf = Pdf::loadView('walikelas.report.pdf', compact(
-            'student', 'rombel', 'grouped', 'rekap', 'from', 'to'
+            'student', 'rombelInfo', 'grouped', 'rekap', 'from', 'to'
         ))->setPaper('a4', 'portrait');
 
         $filename = 'Laporan_' . str_replace(' ', '_', $student->name) . '_' . $from->format('Ymd') . '-' . $to->format('Ymd') . '.pdf';
@@ -242,9 +248,14 @@ class WaliKelasController extends Controller
 
         ['from' => $from, 'to' => $to, 'rekap' => $rekap, 'grouped' => $grouped] = $this->buildReportData($request, $student, $teacherFilterId);
 
-        $rombel = $student->rombels()->first();
+        $lastRow = collect($grouped)->flatten(1)->last();
+        $rombelInfo = [
+            'name'          => $lastRow['rombel'] ?? '-',
+            'classroom'     => $lastRow['classroom'] ?? '-',
+            'academic_year' => $lastRow['academic_year'] ?? '-',
+        ];
 
-        $pdf = Pdf::loadView('walikelas.report.pdf', compact('student', 'rombel', 'grouped', 'rekap', 'from', 'to'));
+        $pdf = Pdf::loadView('walikelas.report.pdf', compact('student', 'rombelInfo', 'grouped', 'rekap', 'from', 'to'));
         return $pdf->stream('Preview_Laporan.pdf');
     }
 }

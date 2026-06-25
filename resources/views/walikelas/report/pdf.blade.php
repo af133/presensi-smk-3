@@ -254,11 +254,11 @@
     <tr>
         <td class="label">Kelas</td>
         <td class="colon">:</td>
-        <td class="value">{{ $rombel->name }}</td>
+        <td class="value">{{ $rombelInfo['name'] }}</td>
         
         <td class="label">Tahun Ajaran</td>
         <td class="colon">:</td>
-        <td class="value">{{ $rombel->academicYear->name }}</td>
+        <td class="value">{{ $rombelInfo['academic_year'] }}</td>
     </tr>
     <tr>
         <td class="label">Wali Kelas</td>

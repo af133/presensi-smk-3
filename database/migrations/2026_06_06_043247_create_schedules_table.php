@@ -9,12 +9,12 @@ return new class extends Migration
     public function up() {
         Schema::create('days', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // Senin, Selasa, dll
+            $table->string('name');
         });
 
         Schema::create('time_slots', function (Blueprint $table) {
             $table->id();
-            $table->string('jam_ke'); // 'Jam ke-1'
+            $table->string('jam_ke'); 
             $table->time('start_time');
             $table->time('end_time');
             $table->foreignId('day_id')->constrained()->onDelete('cascade');
@@ -29,8 +29,6 @@ return new class extends Migration
             $table->id();
             $table->string('name'); 
         });
-
-        // Tabel Utama Schedule
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
             $table->foreignId('time_slot_id')->constrained();
