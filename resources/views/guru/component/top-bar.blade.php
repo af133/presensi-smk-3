@@ -6,7 +6,7 @@
         
         <div class="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-emerald-500 text-white text-xs font-bold shadow-sm">
             @if(auth()->user()->photo)
-                <img src="{{ asset('storage/' . auth()->user()->photo) }}" alt="Profile" class="w-full h-full object-cover">
+                <img src="{{ 'storage/app/public/' . auth()->user()->photo  }}" alt="Profile" class="w-full h-full object-cover">
             @else
                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
             @endif
