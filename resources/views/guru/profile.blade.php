@@ -11,7 +11,7 @@
             <div class="mb-6 flex flex-col items-center">
                 <div class="w-24 h-24 rounded-full bg-gray-100 overflow-hidden mb-3 border-2 border-white shadow-md">
                     @if($user->photo)
-                        <img src="{{ asset('storage/' . $user->photo) }}" class="w-full h-full object-cover">
+                        <img src="{{ 'storage/' . $user->photo }}" class="w-full h-full object-cover">
                     @else
                         <div class="w-full h-full flex items-center justify-center bg-blue-500 text-white font-bold text-3xl">
                             {{ strtoupper(substr($user->name, 0, 1)) }}

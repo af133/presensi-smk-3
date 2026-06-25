@@ -4,7 +4,7 @@
        <div class="flex items-center gap-3 p-3 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
             <div class="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center shadow-lg border border-white/10">
                 @if(auth()->user()->photo)
-                    <img src="{{ asset('storage/' . auth()->user()->photo) }}" alt="Profile" class="w-full h-full object-cover">
+                    <img src="{{ 'storage/' . auth()->user()->photo }}" alt="Profile" class="w-full h-full object-cover">
                 @else
                     <div class="w-full h-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold">
                         {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}

@@ -25,16 +25,20 @@ class ProfileController extends Controller
             'password' => 'nullable|confirmed|min:6',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
+
         if ($request->hasFile('photo')) {
             if ($user->photo) {
                 Storage::disk('public')->delete($user->photo);
             }
+            
             $path = $request->file('photo')->store('profiles', 'public');
             $user->photo = $path;
         }
+
         $user->name = $request->name;
         $user->email = $request->email;
         $user->nip = $request->nip;
+        
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);
         }
