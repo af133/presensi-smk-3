@@ -27,10 +27,11 @@ class WaliKelasController extends Controller
         $studentsPerGuru = collect();
         $rombels = Rombel::all();
 
-        if ($user->hasPermission('can_laporan_presensi_siswa_all')) {
+      if ($user->hasPermission('can_laporan_presensi_siswa_all')) {
             $studentsAll = Student::query()
                 ->when($rombelId, fn($q) => $q->whereHas('rombels', fn($q) => $q->where('rombels.id', $rombelId)))
                 ->when($search, fn($q) => $q->where('name', 'like', "%{$search}%")->orWhere('nisn', 'like', "%{$search}%"))
+                ->with('rombels')
                 ->orderBy('name')
                 ->paginate(20, ['*'], 'page_all')->withQueryString();
         }
@@ -40,6 +41,7 @@ class WaliKelasController extends Controller
             if ($rombel) {
                 $studentsTeacher = Student::whereHas('rombels', fn($q) => $q->where('rombels.id', $rombel->id))
                     ->when($search, fn($q) => $q->where('name', 'like', "%{$search}%")->orWhere('nisn', 'like', "%{$search}%"))
+                    ->with('rombels')
                     ->orderBy('name')
                     ->paginate(20, ['*'], 'page_teacher')->withQueryString();
             }
@@ -54,6 +56,7 @@ class WaliKelasController extends Controller
                 $studentsPerGuru = Student::whereHas('rombels', fn($q) => $q->whereIn('rombels.id', $rombelIds))
                     ->when($rombelId, fn($q) => $q->whereHas('rombels', fn($q) => $q->where('rombels.id', $rombelId)))
                     ->when($search, fn($q) => $q->where('name', 'like', "%{$search}%")->orWhere('nisn', 'like', "%{$search}%"))
+                    ->with('rombels') 
                     ->orderBy('name')
                     ->distinct()
                     ->paginate(20, ['*'], 'page_perguru')->withQueryString();
@@ -110,19 +113,13 @@ class WaliKelasController extends Controller
             'wali_kelas' => $tryWaliKelas,
             'per_guru'   => $tryPerGuru,
         ];
-
-        // 1) Hormati scope yang diminta dari tab, tapi tetap divalidasi ulang di server
         if ($requestedScope && isset($resolvers[$requestedScope])) {
             $result = $resolvers[$requestedScope]();
             if ($result) {
                 return $result;
             }
-            // requestedScope tidak valid untuk user/siswa ini -> jangan diam-diam ganti scope,
-            // supaya tidak salah menampilkan data yang lebih luas dari tab yang diminta.
             abort(403, 'Anda tidak memiliki akses ke laporan siswa ini melalui tab tersebut.');
         }
-
-        // 2) Tidak ada scope dikirim (atau nilai sampah) -> fallback ke prioritas terluas
         foreach ($resolvers as $resolver) {
             $result = $resolver();
             if ($result) {
@@ -136,9 +133,9 @@ class WaliKelasController extends Controller
     /**
      * @param Request $request
      * @param Student $student
-     * @param int|null $teacherId  Jika diisi, presensi difilter hanya untuk sesi
-     *                             yang diajar guru ini (jalur akses 'per_guru').
-     *                             Null berarti tampilkan semua mapel (jalur 'all' / 'wali_kelas').
+     * @param int|null $teacherId 
+     *                            
+     *                            
      */
     private function buildReportData(Request $request, Student $student, ?int $teacherId = null)
     {
@@ -223,13 +220,9 @@ class WaliKelasController extends Controller
     public function downloadReport(Request $request, $studentId)
     {
         ['student' => $student, 'scope' => $scope] = $this->authorizeStudentAccess($request, $studentId);
-
-        // Jalur 'per_guru' (siswa yang diajar) dibatasi hanya pada sesi miliknya sendiri
         $teacherFilterId = $scope === 'per_guru' ? Auth::id() : null;
 
         ['from' => $from, 'to' => $to, 'rekap' => $rekap, 'grouped' => $grouped] = $this->buildReportData($request, $student, $teacherFilterId);
-
-        // rombel ditampilkan di laporan sebagai konteks; ambil rombel pertama siswa
         $rombel = $student->rombels()->first();
 
         $pdf = Pdf::loadView('walikelas.report.pdf', compact(

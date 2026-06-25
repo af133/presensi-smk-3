@@ -1,7 +1,7 @@
 @extends('guru.layout')
 
 @section('content')
-<div class="max-w-3xl mx-auto p-4 md:p-6" 
+<div class="max-w-3xl mx-auto pb-14 md:p-6" 
      x-data="{ 
         from: '{{ request('from', now()->startOfMonth()->format('Y-m-d')) }}', 
         to: '{{ request('to', now()->format('Y-m-d')) }}',
@@ -14,7 +14,6 @@
             <h1 class="text-xl font-bold text-gray-900">Laporan Presensi Guru</h1>
             <p class="text-sm text-gray-500 mt-1">Unduh laporan kehadiran per guru berdasarkan periode.</p>
         </div>
-        <!-- Tombol Unduh Semua -->
         <a :href="`{{ route('waka.report.download.all') }}?from=${from}&to=${to}`"
            class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-xs font-bold rounded-xl hover:bg-green-700 shadow-sm transition">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -23,23 +22,22 @@
             Unduh Semua
         </a>
     </div>
-
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 md:p-5">
-        <div class="mb-6">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Filter Periode</p>
-            <div class="flex flex-wrap gap-4 items-end">
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-xs font-medium text-gray-600">Tanggal Mulai</label>
-                    <input type="date" x-model="from"
-                           class="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition">
-                </div>
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-xs font-medium text-gray-600">Tanggal Selesai</label>
-                    <input type="date" x-model="to"
-                           class="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition">
-                </div>
+     <div class="mb-6">
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Filter Periode</p>
+        <div class="flex flex-nowrap gap-2 items-end">
+            <div class="flex flex-col gap-1.5 flex-1">
+                <label class="text-xs font-medium text-gray-600">Tanggal Mulai</label>
+                <input type="date" x-model="from"
+                    class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition">
+            </div>
+            <div class="flex flex-col gap-1.5 flex-1">
+                <label class="text-xs font-medium text-gray-600">Tanggal Selesai</label>
+                <input type="date" x-model="to"
+                    class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition">
             </div>
         </div>
+    </div>
 
         <div class="-mx-4 md:mx-0 border border-gray-100 rounded-none md:rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
@@ -94,7 +92,6 @@
             </div>
         </div>
     </div>
-
     <div x-show="showModal" 
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" 
          x-cloak>

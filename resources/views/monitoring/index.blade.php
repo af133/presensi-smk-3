@@ -2,8 +2,6 @@
 
 @section('content')
 <div class="space-y-6">
-
-    {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-slate-800">Monitoring Ruangan</h1>
@@ -12,8 +10,6 @@
                 <span class="font-medium text-slate-700">{{ $today->translatedFormat('l, d F Y') }}</span>
             </p>
         </div>
-
-        {{-- Legenda --}}
         <div class="flex flex-wrap gap-2 text-xs">
             <span class="flex items-center gap-1.5 bg-white border border-gray-200 rounded-full px-3 py-1 shadow-sm">
                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Aktif (Hadir)
@@ -32,8 +28,6 @@
             </span>
         </div>
     </div>
-
-    {{-- Tab Hari --}}
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-1 flex gap-1 flex-wrap">
         @forelse($days as $day)
             <a href="{{ route('monitoring.index', ['day_id' => $day->id]) }}"
@@ -55,7 +49,6 @@
     </div>
 
     @if(!$selectedDay || $timeSlots->isEmpty() || $classrooms->isEmpty())
-        {{-- Empty state --}}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center py-24 text-center">
             <div class="text-5xl mb-4">🏫</div>
             <h3 class="text-lg font-semibold text-slate-700">Belum Ada Data</h3>
@@ -70,8 +63,6 @@
             </p>
         </div>
     @else
-
-        {{-- Info bar hari aktif --}}
         @if($isToday)
         <div class="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 flex items-center gap-3 text-sm text-emerald-800">
             <span class="relative flex h-3 w-3">
@@ -86,8 +77,6 @@
             <span>Menampilkan <strong>jadwal</strong> untuk hari <strong>{{ $selectedDay->name }}</strong>. Status presensi hanya tersedia untuk hari ini.</span>
         </div>
         @endif
-
-        {{-- Tabel Grid --}}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
@@ -106,8 +95,6 @@
                     <tbody class="divide-y divide-gray-100">
                         @forelse($timeSlots as $i => $slot)
                         <tr class="{{ $i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50' }} hover:bg-blue-50/40 transition-colors duration-150">
-
-                            {{-- Kolom Jam --}}
                             <td class="px-4 py-4 sticky left-0 z-10 
                                        {{ $i % 2 === 0 ? 'bg-white' : 'bg-slate-50' }}
                                        hover:bg-blue-50/40">
@@ -117,8 +104,6 @@
                                     {{ \Carbon\Carbon::parse($slot->end_time)->format('H:i') }}
                                 </div>
                             </td>
-
-                            {{-- Kolom per Ruangan --}}
                             @foreach($classrooms as $room)
                             @php
                                 $cell = $grid[$slot->id][$room->id] ?? ['status' => 'kosong', 'schedule' => null, 'presence' => null, 'label' => 'Tidak Ada Kegiatan'];
@@ -142,8 +127,6 @@
                                      @mouseleave="tooltip = false"
                                      @endif
                                      >
-
-                                    {{-- Dot indikator --}}
                                     <span class="inline-flex items-center gap-1.5">
                                         @if($status === 'aktif')
                                         <span class="relative flex h-2.5 w-2.5">
@@ -154,20 +137,14 @@
                                         <span class="w-2.5 h-2.5 rounded-full {{ $c['dot'] }}"></span>
                                         @endif
                                     </span>
-
-                                    {{-- Label utama --}}
                                     <div class="text-xs font-semibold {{ $c['text'] }} leading-tight text-center">
                                         {{ $cell['label'] }}
                                     </div>
-
-                                    {{-- Info tambahan jika ada jadwal --}}
                                     @if($schedule)
                                     <div class="text-[10px] text-slate-500 leading-tight text-center space-y-0.5">
                                         <div class="truncate max-w-[130px]">{{ $schedule->rombel->name ?? '-' }}</div>
                                         <div class="truncate max-w-[130px] font-medium">{{ $schedule->teacher->name ?? '-' }}</div>
                                     </div>
-
-                                    {{-- Tooltip detail --}}
                                     <div x-show="tooltip"
                                          x-cloak
                                          x-transition:enter="transition ease-out duration-150"
@@ -226,8 +203,6 @@
                 </table>
             </div>
         </div>
-
-        {{-- Summary Cards --}}
         @if($isToday)
         @php
             $totalCells = $timeSlots->count() * $classrooms->count();

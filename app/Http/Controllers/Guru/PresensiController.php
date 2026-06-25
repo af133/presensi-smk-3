@@ -521,12 +521,9 @@ class PresensiController extends Controller
         $currentDayName = $dayNames[$today->dayOfWeek];
         $selectedDayId = $request->get('day_id');
         $days = Day::orderBy('id')->get();
- 
-        // Tentukan hari yang aktif
         if ($selectedDayId) {
             $selectedDay = Day::find($selectedDayId);
         } else {
-            // Default ke hari ini
             $selectedDay = Day::where('name', $currentDayName)->first()
                 ?? $days->first();
         }

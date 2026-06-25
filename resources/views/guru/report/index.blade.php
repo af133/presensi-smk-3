@@ -1,7 +1,7 @@
 @extends('guru.layout')
 
 @section('content')
-<div class="max-w-3xl mx-auto  md:p-6" x-data="{ 
+<div class="max-w-3xl mx-auto pb-15 md:p-6" x-data="{ 
     tab: '{{ $studentsTeacher->isNotEmpty() ? 'teacher' : ($studentsPerGuru->isNotEmpty() ? 'perguru' : 'all') }}',
     from: '{{ request('from', now()->startOfMonth()->format('Y-m-d')) }}', 
     to: '{{ request('to', now()->format('Y-m-d')) }}',
@@ -46,7 +46,7 @@
             </select>
         </div>
     </form>
-    <div class="flex gap-2 mb-5 border-b border-gray-200 overflow-x-auto">
+    <div class="flex  mb-5 border-b border-gray-200 overflow-x-auto">
         @if ($user->hasPermission('can_laporan_presensi_siswa_guru'))
             <button @click="tab = 'teacher'" :class="tab === 'teacher' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'" class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Wali Kelas</button>
         @endif
@@ -57,7 +57,7 @@
             <button @click="tab = 'all'" :class="tab === 'all' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'" class="px-4 py-2 text-sm font-semibold whitespace-nowrap">Semua Siswa</button>
         @endif
     </div>
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-0 md:p-4">
         @if ($user->hasPermission('can_laporan_presensi_siswa_guru'))
             <div x-show="tab === 'teacher'" x-cloak>
                 @include('guru.report.table', ['students' => $studentsTeacher, 'scope' => 'wali_kelas'])
@@ -75,13 +75,20 @@
         @endif
     </div>
     <div x-show="showModal" 
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" 
-         x-cloak>
+     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" 
+    x-cloak>
         <div class="bg-white rounded-2xl w-full max-w-4xl h-[80vh] flex flex-col overflow-hidden shadow-2xl" 
-             @click.away="showModal = false">
+            @click.away="showModal = false">
             <div class="flex justify-between items-center p-4 border-b">
                 <h3 class="font-bold text-gray-800">Preview Laporan</h3>
-                <button @click="showModal = false" class="text-gray-500 hover:text-gray-800 font-bold">Tutup</button>
+                <div class="flex items-center gap-3">
+                    <a :href="previewUrl" target="_blank"
+                    class="text-xs text-blue-600 font-semibold hover:underline">
+                        Buka di tab baru ↗
+                    </a>
+                    <button @click="showModal = false" 
+                            class="text-gray-500 hover:text-gray-800 font-bold">Tutup</button>
+                </div>
             </div>
             <iframe :src="previewUrl" class="w-full h-full border-0"></iframe>
         </div>

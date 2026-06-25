@@ -15,7 +15,6 @@ use App\Models\AcademicYear;
 
 class AdminScheduleController extends Controller
 {
-    // Tambahkan di Controller kamu
     public function index(Request $request)
     {
         $times = TimeSlot::query()
@@ -89,7 +88,6 @@ class AdminScheduleController extends Controller
             'teacher_id'   => 'required',
             'classroom_id' => 'required',
         ]);
-        // dd($request->all());
 
         Schedule::create([
             'time_slot_id' => $request->time_slot_id,
