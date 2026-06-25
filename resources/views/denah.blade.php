@@ -9,17 +9,16 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; }
-        #map { height: 100vh; width: 100vw; }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; }
+        #map { height: 100vh; width: 100vw; position: absolute; top: 0; left: 0; }
         .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.3); }
         .leaflet-popup-content-wrapper { padding: 0 !important; border-radius: 12px !important; overflow: hidden; }
         .leaflet-popup-content { margin: 0 !important; width: auto !important; min-width: 200px; }
         .leaflet-popup-tip { background: #1e293b; }
-        
         #loader { transition: opacity 0.5s ease; }
     </style>
 </head>
-<body class="overflow-hidden">
+<body>
 
     <div id="loader" class="fixed inset-0 flex items-center justify-center bg-slate-50 z-[2000]">
         <div class="animate-bounce font-bold text-slate-600">Memuat Peta...</div>
@@ -38,7 +37,7 @@
     <div id="login-panel" class="fixed z-[1000] 
         top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
         glass-card p-6 rounded-3xl shadow-2xl border border-white/40 
-        bg-white/70 bg-white/10 backdrop-blur-lg flex flex-col gap-3 min-w-[300px] w-[90%] md:w-96 
+        bg-white/70 backdrop-blur-lg flex flex-col gap-3 min-w-[300px] w-[90%] md:w-96 
         transition-opacity duration-300">
         
         <h2 class="text-slate-800 font-bold text-center mb-2">Akses Sistem</h2>
@@ -59,48 +58,75 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         const rooms = @json($maps);
-        var map = L.map('map', { zoomControl: false, maxZoom: 22 }).setView([-8.1516, 113.7020], 19);
-        L.control.zoom({ position: 'bottomleft' }).addTo(map);
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: 'Tiles &copy; Esri',
-            maxZoom: 22,   
-            maxNativeZoom: 19,
-            zoomOffset: 0
-        }).addTo(map);
 
-        const loginPanel = document.getElementById('login-panel');
-        map.on('popupopen', () => loginPanel.style.opacity = '0');
-        map.on('popupclose', () => loginPanel.style.opacity = '1');
+        document.addEventListener('DOMContentLoaded', function () {
 
-        const roomLayer = L.featureGroup().addTo(map);
+            var map = L.map('map', { zoomControl: false }).setView([-8.1516, 113.7020], 19);
+            L.control.zoom({ position: 'bottomleft' }).addTo(map);
 
-        rooms.forEach(room => {
-            if (!room.geojson) return;
-            try {
-                const layer = L.geoJSON(JSON.parse(room.geojson), {
-                    style: { color: "#fbbf24", fillColor: "#f59e0b", fillOpacity: 0.5, weight: 3 }
-                });
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri',
+                maxZoom: 19,
+                maxNativeZoom: 19,
+                crossOrigin: true,
+            }).addTo(map);
 
-                layer.bindPopup(`
-                    <div class="min-w-[180px]">
-                        <div class="bg-slate-800 text-white px-3 py-2 rounded-t-lg"><h3 class="font-bold text-sm">${room.name}</h3></div>
-                        <div class="p-3 space-y-2">
-                            <div class="text-xs text-gray-600">ID: <span class="bg-slate-100 px-1 rounded">${room.room_code}</span></div>
-                            <div class="text-xs text-gray-600">Lantai: <span class="bg-amber-500 text-white px-2 rounded-full font-bold">${room.floor}</span></div>
+            const loginPanel = document.getElementById('login-panel');
+            map.on('popupopen', () => loginPanel.style.opacity = '0');
+            map.on('popupclose', () => loginPanel.style.opacity = '1');
+
+            const roomLayer = L.featureGroup().addTo(map);
+            function flipCoords(geojson) {
+                if (geojson.type === 'Polygon') {
+                    geojson.coordinates = geojson.coordinates.map(ring =>
+                        ring.map(coord => [coord[1], coord[0]])
+                    );
+                } else if (geojson.type === 'MultiPolygon') {
+                    geojson.coordinates = geojson.coordinates.map(polygon =>
+                        polygon.map(ring =>
+                            ring.map(coord => [coord[1], coord[0]])
+                        )
+                    );
+                }
+                return geojson;
+            }
+
+            rooms.forEach(room => {
+                if (!room.geojson) return;
+                try {
+                    const geojson = flipCoords(JSON.parse(room.geojson));
+
+                    const layer = L.geoJSON(geojson, {
+                        style: { color: "#fbbf24", fillColor: "#f59e0b", fillOpacity: 0.5, weight: 3 }
+                    });
+
+                    layer.bindPopup(`
+                        <div class="min-w-[180px]">
+                            <div class="bg-slate-800 text-white px-3 py-2 rounded-t-lg">
+                                <h3 class="font-bold text-sm">${room.name}</h3>
+                            </div>
+                            <div class="p-3 space-y-2">
+                                <div class="text-xs text-gray-600">ID: <span class="bg-slate-100 px-1 rounded">${room.room_code}</span></div>
+                                <div class="text-xs text-gray-600">Lantai: <span class="bg-amber-500 text-white px-2 rounded-full font-bold">${room.floor}</span></div>
+                            </div>
                         </div>
-                    </div>
-                `, { className: 'custom-popup' });
+                    `, { className: 'custom-popup' });
 
-                layer.addTo(roomLayer);
-            } catch (error) { console.error('Error:', error); }
-        });
+                    layer.addTo(roomLayer);
+                } catch (error) { console.error('GeoJSON Error:', error, room); }
+            });
 
-        if (roomLayer.getLayers().length > 0) {
-            map.fitBounds(roomLayer.getBounds(), { padding: [50, 50] });
-        }
-        window.addEventListener('load', () => {
-            document.getElementById('loader').style.opacity = '0';
-            setTimeout(() => document.getElementById('loader').remove(), 500);
+            if (roomLayer.getLayers().length > 0) {
+                map.fitBounds(roomLayer.getBounds(), { padding: [50, 50] });
+            }
+
+            setTimeout(() => map.invalidateSize(), 100);
+
+            const loader = document.getElementById('loader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.remove(), 500);
+            }
         });
     </script>
 </body>
