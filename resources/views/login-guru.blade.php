@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Guru | Presensi</title>
     <link rel="icon" type="image/png" href="{{ asset('storage/icon/logo-smk3.png') }}">
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="h-full bg-cover bg-center bg-no-repeat" style="background-image: url('https://tugujatim.id/wp-content/uploads/2024/05/a1131603-9b3e-48c5-bf3d-c14c912975aa-1-4.jpeg');">
